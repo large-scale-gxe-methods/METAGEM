@@ -14,8 +14,11 @@ public:
 	size_t nExp;
 	size_t nCov;
 	std::string outFile;
+	std::string metaFileList;
 
 	int metaOpt;
+	bool mb = false;
+	bool rb = false;
 
 	void processCommandLine(int argc, char* argv[]);
 };

@@ -4,14 +4,15 @@
 class FileInfo {
     public:
 
-        int Sq1 = 0;
+        int fileCount = 0;
+        int nBetas = 0;
 
         std::vector<std::string> fileNames;
         std::vector<std::string> lc_betaIntNames;
         std::vector<std::string> betaIntNames;
 
+
         // Indices
-        std::unordered_map<std::string, int> ncols;
         std::unordered_map<std::string, int> nvars;
         std::unordered_map<std::string, int> snpColumn;
         std::unordered_map<std::string, int> chrColumn;
@@ -30,9 +31,9 @@ class FileInfo {
         std::unordered_map<std::string, std::vector<int>> rb_covIntColumn;      
 };
 
-void processFileHeader(int Sq1, std::vector<std::string> lc_intNames, std::string fileName, FileInfo* fip);
+void processFileHeader(int Sq1, int metaOpt, std::vector<std::string> lc_intNames, std::string fileName, FileInfo* fip);
 
-void printOutputHeader(std::string output, size_t Sq1, std::vector<std::string> intNames); 
+void printOutputHeader(std::string output, int metaOpt, size_t Sq1, std::vector<std::string> intNames); 
 
 
 #endif
