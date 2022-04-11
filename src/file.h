@@ -17,7 +17,6 @@ class FileInfo {
 
 
         // Indices
-        std::unordered_map<std::string, int> nvars;
         std::unordered_map<std::string, int> snpColumn;
         std::unordered_map<std::string, int> chrColumn;
         std::unordered_map<std::string, int> posColumn;
@@ -35,7 +34,7 @@ class FileInfo {
         std::unordered_map<std::string, std::vector<int>> rb_covIntColumn;      
 };
 
-void processFileHeader(int Sq1, int metaOpt, std::vector<std::string> lc_intNames, std::vector<std::string> fileNames, int* v, sparse_hash_map<std::string, int>* idx, FileInfo* fip);
+void processFileHeader(int Sq1, int metaOpt, std::vector<std::string> lc_intNames, std::vector<std::string> fileNames, FileInfo* fip);
 
 void printOutputHeader(std::string output, int metaOpt, size_t Sq1, std::vector<std::string> intNames); 
 
