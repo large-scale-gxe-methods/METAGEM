@@ -1,9 +1,13 @@
 #ifndef FILE_H
 #define FILE_H
 
+#include "../include/sparsepp-2018.2/spp.h"
+using spp::sparse_hash_map;
+
 class FileInfo {
     public:
 
+        int v = 0;
         int fileCount = 0;
         int nBetas = 0;
 
@@ -31,7 +35,7 @@ class FileInfo {
         std::unordered_map<std::string, std::vector<int>> rb_covIntColumn;      
 };
 
-void processFileHeader(int Sq1, int metaOpt, std::vector<std::string> lc_intNames, std::string fileName, FileInfo* fip);
+void processFileHeader(int Sq1, int metaOpt, std::vector<std::string> lc_intNames, std::vector<std::string> fileNames, int* v, sparse_hash_map<std::string, int>* idx, FileInfo* fip);
 
 void printOutputHeader(std::string output, int metaOpt, size_t Sq1, std::vector<std::string> intNames); 
 

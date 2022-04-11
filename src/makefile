@@ -1,11 +1,11 @@
 CC=gcc  # Do not change this for libdeflate package.
 CXX=g++
-CXXFLAGS = -std=c++11 -O2 -g -Wall
+CXXFLAGS = -std=c++11 -O3 -g -Wall
 
 # Uncomment line below for LAPACK/BLAS only and comment other lines beginning with LIBS.
-#LIBS= -llapack -lblas -ldl -pthread -lm -lboost_program_options -lboost_thread -lboost_system -lboost_filesystem
+#LIBS= -llapack -lblas -ldl --lm 
 
-LIBS= -lmkl_gf_lp64 -lmkl_sequential -lmkl_core -ldl -lpthread -lm -lboost_program_options -lboost_thread -lboost_system -lboost_filesystem
+LIBS= -lmkl_gf_lp64 -lmkl_sequential -lmkl_core -ldl -lm 
 
 CXX_SOURCES= matrix_utils.cpp read_parameters.cpp file.cpp metagem.cpp
 CXX_OBJECTS= matrix_utils.o read_parameters.o file.o metagem.o
