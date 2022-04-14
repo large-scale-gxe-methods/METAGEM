@@ -17,6 +17,7 @@ class FileInfo {
 
 
         // Indices
+        std::unordered_map<std::string, int> nheader;
         std::unordered_map<std::string, int> snpColumn;
         std::unordered_map<std::string, int> chrColumn;
         std::unordered_map<std::string, int> posColumn;

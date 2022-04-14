@@ -44,7 +44,7 @@ void processFileHeader(int Sq1, int metaOpt, std::vector<std::string> lc_intName
 
             header_i++;
         }
-
+        fip->nheader[fileName] = header_i;
 
         // Get variant information columns
         int snpid_col = 0;
