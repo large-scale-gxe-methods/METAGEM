@@ -1,6 +1,5 @@
 #include "metagem.h"
 
-
 void processFileHeader(int nInt1, bool mb, bool rb, std::vector<std::string> lc_intNames, std::vector<std::string> fileNames, FileInfo* fip) 
 {
     for (size_t f = 0; f < fileNames.size(); f++) {
@@ -11,17 +10,25 @@ void processFileHeader(int nInt1, bool mb, bool rb, std::vector<std::string> lc_
         std::ifstream file;
         file.open(fileName);
         if (!file.is_open()) {
-            cerr << "\nERROR: Cannot open the file: " << fileName << "\n\n";
+            printOpenFileError(fileName);
             exit(1);
         }
         fip->fileNames.push_back(fileName);
 
         // Ignore comments in the text file (ex. #dispersion: )
         std::string line;
+        std::string headerLine;
         getline(file, line);
         while(line.rfind("#", 0) == 0)
         {
             getline(file, line);
+        }
+        headerLine = line;
+
+        int nvars = 0;
+        if (f == 0) {
+            while(getline(file, line)) { nvars++; }
+            fip->file0_nvars = nvars;
         }
         file.close();
 
@@ -30,7 +37,7 @@ void processFileHeader(int nInt1, bool mb, bool rb, std::vector<std::string> lc_
 
         int header_i = 0;
         std::string header;
-        std::istringstream iss(line);
+        std::istringstream iss(headerLine);
         while (getline(iss, header, '\t')) 
         {
             header.erase(std::remove(header.begin(), header.end(), '\r'), header.end());
@@ -55,7 +62,7 @@ void processFileHeader(int nInt1, bool mb, bool rb, std::vector<std::string> lc_
         } 
         else 
         {
-            cerr << "\nERROR: The file [" << fileName << "] does not contain a SNPID column.\n\n";
+            printHeaderMissingError(fileName, "SNPID");
             exit(1);
         }
 
@@ -65,7 +72,7 @@ void processFileHeader(int nInt1, bool mb, bool rb, std::vector<std::string> lc_
         }
         else
         {
-            cerr << "\nERROR: The file [" << fileName << "] does not contain a CHR column.\n\n";
+            printHeaderMissingError(fileName, "CHR");
             exit(1);
         }
 
@@ -75,7 +82,7 @@ void processFileHeader(int nInt1, bool mb, bool rb, std::vector<std::string> lc_
         }
         else
         {
-            cerr << "\nERROR: The file [" << fileName << "] does not contain a POS column.\n\n";
+            printHeaderMissingError(fileName, "POS");
             exit(1);
         }
 
@@ -85,7 +92,7 @@ void processFileHeader(int nInt1, bool mb, bool rb, std::vector<std::string> lc_
         }
         else
         {
-            cerr << "\nERROR: The file [" << fileName << "] does not contain a Non_Effect_Allele column.\n\n";
+            printHeaderMissingError(fileName, "Non_Effect_Allele");
             exit(1);
         }
 
@@ -95,7 +102,7 @@ void processFileHeader(int nInt1, bool mb, bool rb, std::vector<std::string> lc_
         }
         else
         {
-            cerr << "\nERROR: The file [" << fileName << "] does not contain a Effect_Allele column.\n\n";
+            printHeaderMissingError(fileName, "Effect_Allele");
             exit(1);
         }
 
@@ -105,7 +112,7 @@ void processFileHeader(int nInt1, bool mb, bool rb, std::vector<std::string> lc_
         }
         else
         {
-            cerr << "\nERROR: The file [" << fileName << "] does not contain a N_Samples column.\n\n";
+            printHeaderMissingError(fileName, "N_Samples");
             exit(1);
         }
 
@@ -115,7 +122,7 @@ void processFileHeader(int nInt1, bool mb, bool rb, std::vector<std::string> lc_
         }
         else
         {
-            cerr << "\nERROR: The file [" << fileName << "] does not contain a AF column.\n\n";
+            printHeaderMissingError(fileName, "AF");
             exit(1);
         }
         
@@ -128,7 +135,7 @@ void processFileHeader(int nInt1, bool mb, bool rb, std::vector<std::string> lc_
         }
         else
         {
-            cerr << "\nERROR: The file [" << fileName << "] does not contain a Beta_Marginal column.\n\n";
+            printHeaderMissingError(fileName, "Beta_Marginal");
             exit(1);
         }
 
@@ -141,7 +148,7 @@ void processFileHeader(int nInt1, bool mb, bool rb, std::vector<std::string> lc_
             }
             else 
             {
-                cerr << "\nERROR: The file [" << fileName << "] does not contain model-based marginal SE.\n\n";
+                printHeaderMissingError(fileName, "SE_Beta_Marginal");
                 exit(1);
             }
         }
@@ -155,7 +162,7 @@ void processFileHeader(int nInt1, bool mb, bool rb, std::vector<std::string> lc_
             }
             else 
             {
-                cerr << "\nERROR: The file [" << fileName << "] does not contain robust marginal SE.\n\n";
+                printHeaderMissingError(fileName, "robust_SE_Beta_Marginal");
                 exit(1);
             }
         }
@@ -165,7 +172,7 @@ void processFileHeader(int nInt1, bool mb, bool rb, std::vector<std::string> lc_
         int nints = 0;
         std::vector<std::string> betaIntNames;
         if (columnNames.find("Beta_G") == columnNames.end()) {
-            cerr << "\nERROR: The file [" << fileName << "] does not contain a Beta_G column.\n\n";
+            printHeaderMissingError(fileName, "Beta_G");
             exit(1);
         }
         else
@@ -236,7 +243,7 @@ void processFileHeader(int nInt1, bool mb, bool rb, std::vector<std::string> lc_
                 }
                 else 
                 {
-                    cerr << "\nERROR: The file [" << fileName << "] does not contain the column " << s1 << ".\n\n";
+                    printHeaderMissingError(fileName,  s1);
                     exit(1);
                 }
             }
@@ -282,7 +289,7 @@ void processFileHeader(int nInt1, bool mb, bool rb, std::vector<std::string> lc_
                 }
                 else 
                 {
-                    cerr << "\nERROR: The file [" << fileName << "] does not contain the column " << s1 << ".\n\n";
+                    printHeaderMissingError(fileName,  s1);
                     exit(1);
                 }
             }
@@ -358,7 +365,7 @@ void printOutputHeader(bool mb, bool rb, std::string output, size_t nInt1, std::
         }
 
         // Print p-values
-        results << "P_value_Marginal\t" << "P_Value_Interaction\t" << "P_Value_Joint" << ((rb) ? "\t" : "\n");
+        results << "P_Value_Marginal\t" << "P_Value_Interaction\t" << "P_Value_Joint" << ((rb) ? "\t" : "\n");
     }
 
     if (rb)
@@ -387,7 +394,7 @@ void printOutputHeader(bool mb, bool rb, std::string output, size_t nInt1, std::
             }
         }
 
-        results << "robust_P_value_Marginal\t" << "robust_P_Value_Interaction\t" << "robust_P_Value_Joint\n";
+        results << "robust_P_Value_Marginal\t" << "robust_P_Value_Interaction\t" << "robust_P_Value_Joint\n";
     }
     
     results.close();
