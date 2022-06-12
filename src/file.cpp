@@ -1,7 +1,7 @@
 #include "metagem.h"
 
 
-void processFileHeader(int Sq1, int metaOpt, std::vector<std::string> lc_intNames, std::vector<std::string> fileNames, FileInfo* fip) 
+void processFileHeader(int nInt1, bool mb, bool rb, std::vector<std::string> lc_intNames, std::vector<std::string> fileNames, FileInfo* fip) 
 {
     for (size_t f = 0; f < fileNames.size(); f++) {
 
@@ -132,7 +132,7 @@ void processFileHeader(int Sq1, int metaOpt, std::vector<std::string> lc_intName
             exit(1);
         }
 
-        if (metaOpt == 0 || metaOpt == 1)
+        if (mb)
         {
             // Get marginal model based SE columns if it exists
             if (columnNames.find("SE_Beta_Marginal") != columnNames.end())
@@ -146,7 +146,7 @@ void processFileHeader(int Sq1, int metaOpt, std::vector<std::string> lc_intName
             }
         }
 
-        if (metaOpt == 0 || metaOpt == 2)
+        if (rb)
         {
             // Get marginal robust SE columns if it exists
             if (columnNames.find("robust_SE_Beta_Marginal") != columnNames.end())
@@ -185,7 +185,7 @@ void processFileHeader(int Sq1, int metaOpt, std::vector<std::string> lc_intName
         }
 
 
-        if(nints != Sq1)
+        if(nints != nInt1)
         {
             cerr << "\nERROR: The file [" << fileName << "] does not contain the same number of interaction terms as --exposure-names.\n\n";
             exit(1);
@@ -202,7 +202,7 @@ void processFileHeader(int Sq1, int metaOpt, std::vector<std::string> lc_intName
         // Order the interactions base on the first vector of interactions
         std::vector<int> betaIntColumn;
         std::vector<std::string> ord_betaIntNames;
-        for (int i = 0; i < Sq1; i++)
+        for (int i = 0; i < nInt1; i++)
         {
             auto it = std::find(lc_betaIntNames.begin(), lc_betaIntNames.end(), lc_intNames[i]);
             if (it != lc_betaIntNames.end())
@@ -223,7 +223,7 @@ void processFileHeader(int Sq1, int metaOpt, std::vector<std::string> lc_intName
 
 
         // Get columns containing the model-based summary statistics for the interaction terms
-        if (metaOpt == 0 || metaOpt == 1)
+        if (mb)
         {
             std::vector<int> mb_covIntColumn(nints * nints);
 
@@ -270,7 +270,7 @@ void processFileHeader(int Sq1, int metaOpt, std::vector<std::string> lc_intName
 
 
         // Get columns containing the robust summary statistics for the interaction terms	
-        if (metaOpt == 0 || metaOpt == 2)
+        if (rb)
         {
             std::vector<int> rb_covIntColumn(nints * nints);
             for (int i = 0; i < nints; i++) 
@@ -319,25 +319,8 @@ void processFileHeader(int Sq1, int metaOpt, std::vector<std::string> lc_intName
 
 
 
-void printOutputHeader(std::string output, int metaOpt, size_t Sq1, std::vector<std::string> intNames) 
+void printOutputHeader(bool mb, bool rb, std::string output, size_t nInt1, std::vector<std::string> intNames) 
 {
-    bool mb = false;
-    bool rb = false;
-
-    if (metaOpt == 0) {
-        mb = true;
-        rb = true;
-
-    }
-    else if (metaOpt == 1) {
-        mb = true;
-    }
-    else if (metaOpt == 2)
-    {
-        rb = true;
-    }
-
-
     for(std::string &s : intNames){
         s = "G-" + s;
     }
@@ -351,30 +334,21 @@ void printOutputHeader(std::string output, int metaOpt, size_t Sq1, std::vector<
     if (mb)
     {
         results << "Beta_Marginal\t" << "SE_Beta_Marginal\t";
-    }
-
-    if (rb)
-    {
-        results << "robust_Beta_Marginal\t" << "robust_SE_Beta_Marginal\t";
-    }
-
-    if (mb)
-    {
-        // Print beta header
-        for (size_t i = 0; i < Sq1; i++) 
+       
+        // Print Int beta header
+        for (size_t i = 0; i < nInt1; i++) 
         {
             results << "Beta_" << intNames[i] << "\t";
         }
 
         // Print model-based covariance
-        for (size_t i = 0; i < Sq1; i++) 
+        for (size_t i = 0; i < nInt1; i++) 
         {
             results << "SE_Beta_" << intNames[i] << "\t"; 
         }
-
-        for (size_t i = 0; i < Sq1; i++) 
+        for (size_t i = 0; i < nInt1; i++) 
         {
-            for (size_t j = 0; j < Sq1; j++) 
+            for (size_t j = 0; j < nInt1; j++) 
             {
                 if (i < j) 
                 {
@@ -382,25 +356,29 @@ void printOutputHeader(std::string output, int metaOpt, size_t Sq1, std::vector<
                 }
             }
         }
+
+        // Print p-values
+        results << "P_value_Marginal\t" << "P_Value_Interaction\t" << "P_Value_Joint" << ((rb) ? "\t" : "\n");
     }
 
     if (rb)
     {
+        results << "robust_Beta_Marginal\t" << "robust_SE_Beta_Marginal\t";
+
         // Print beta header
-        for (size_t i = 0; i < Sq1; i++) 
+        for (size_t i = 0; i < nInt1; i++) 
         {
             results << "robust_Beta_" << intNames[i] << "\t";
         }
 
         // Print model-based covariance
-        for (size_t i = 0; i < Sq1; i++) 
+        for (size_t i = 0; i < nInt1; i++) 
         {
             results << "robust_SE_Beta_" << intNames[i] << "\t"; 
         }
-
-        for (size_t i = 0; i < Sq1; i++) 
+        for (size_t i = 0; i < nInt1; i++) 
         {
-            for (size_t j = 0; j < Sq1; j++) 
+            for (size_t j = 0; j < nInt1; j++) 
             {
                 if (i < j) 
                 {
@@ -408,17 +386,7 @@ void printOutputHeader(std::string output, int metaOpt, size_t Sq1, std::vector<
                 }
             }
         }
-    }
 
-
-    // Print p-value
-    if (mb)
-    {
-        results << "P_value_Marginal\t" << "P_Value_Interaction\t" << "P_Value_Joint" << ((rb) ? "\t" : "\n");
-    }
-
-    if (rb)
-    {
         results << "robust_P_value_Marginal\t" << "robust_P_Value_Interaction\t" << "robust_P_Value_Joint\n";
     }
     

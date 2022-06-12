@@ -1,6 +1,6 @@
 CC=gcc  # Do not change this for libdeflate package.
 CXX=g++
-CXXFLAGS = -std=c++11 -O3 -g -Wall
+CXXFLAGS = -std=c++11 -O3 -pg -Wall
 
 # Uncomment line below for LAPACK/BLAS only and comment other lines beginning with LIBS.
 #LIBS= -llapack -lblas -ldl --lm 
