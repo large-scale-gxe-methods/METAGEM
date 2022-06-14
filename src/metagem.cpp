@@ -88,7 +88,7 @@ void metagem(CommandLine cmd)
         int nheader          = fip->nheader[fileName];
         std::vector<int> betaIntColumn = fip->betaIntColumn[fileName];
 
-        sparse_hash_map<std::string, int> seen;
+        std::vector<uint8_t> seen;
 
         // Read input file
         std::ifstream file;
@@ -109,6 +109,7 @@ void metagem(CommandLine cmd)
         while(line.rfind("#", 0) == 0) { getline(file, line); }
     
         if (f == 0) {
+            sparse_hash_map<std::string, std::vector<int>> seen;
             while(getline(file, line))
             {
                 line.erase(std::remove(line.begin(), line.end(), '\r'), line.end());
@@ -141,13 +142,24 @@ void metagem(CommandLine cmd)
                 std::string idB = identifier + ":" + a2 + ":" + a1;
                 std::pair<std::string, std::string> id = {idA, idB};
 
-                sparse_hash_map<std::string, int>::iterator it2 = seen.find(idA);
-                if (it2 == seen.end()) {
-                    seen[idA] = 1;
-                } else {
-                    n++;
-                    continue;
+                sparse_hash_map<std::string, std::vector<int>>::iterator it = seen.find(identifier);
+                if (it != seen.end()) {
+                    bool duplicate = false;
+                    std::vector<int> indices = it->second;
+                    for (size_t i = 0; i < indices.size(); i++) {
+                        std::string na = nonEffectAllele[indices[i]];
+                        std::string ea = effectAllele[indices[i]];
+                        if (((a1.compare(na) == 0) && (a2.compare(ea) == 0)) ||  ((a1.compare(ea) == 0) && (a2.compare(na) == 0))) {
+                            duplicate = true;
+                        }
+                    }
+
+                    if (duplicate) {
+                        n++;
+                        continue;
+                    }
                 }
+                seen[identifier].push_back(1);
 
                 int index = nvars;
                 snpid_idx[id] = index;
@@ -267,6 +279,7 @@ void metagem(CommandLine cmd)
                 }
             }
         } else {
+            std::vector<int> seen(nvars, 0);
             while(getline(file, line))
             {
                 line.erase(std::remove(line.begin(), line.end(), '\r'), line.end());
@@ -302,7 +315,7 @@ void metagem(CommandLine cmd)
                 sparse_hash_map<std::pair<std::string, std::string>, int>::iterator it = snpid_idx.find(id);
                 if (it == snpid_idx.end()) {
                     snpid_idx[id] = nvars;
-                    seen[idA] = 1;
+                    seen.push_back(1);
 
                     snpid.push_back(snpName + "\t" + chr+ "\t" + pos + "\t" + a1 + "\t" + a2 + "\t");
                     nonEffectAllele.push_back(a1);
@@ -378,15 +391,14 @@ void metagem(CommandLine cmd)
 
                     nvars++;
                 } else {
-                    sparse_hash_map<std::string, int>::iterator it2 = seen.find(idA);
-                    if (it2 == seen.end()) {
-                        seen[idA] = 1;
+                    
+                    int index = it->second;
+                    if (seen[index] == 0) {
+                        seen[index] = 1;
                     } else {
                         n++;
                         continue;
                     }
-
-                    int index = it->second;
 
                     int dir = 1.0;
                     std::string na = nonEffectAllele[index];
