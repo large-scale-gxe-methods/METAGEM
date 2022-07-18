@@ -17,18 +17,10 @@ void processFileHeader(int nInt1, bool mb, bool rb, std::vector<std::string> lc_
 
         // Ignore comments in the text file (ex. #dispersion: )
         std::string line;
-        std::string headerLine;
         getline(file, line);
         while(line.rfind("#", 0) == 0)
         {
             getline(file, line);
-        }
-        headerLine = line;
-
-        int nvars = 0;
-        if (f == 0) {
-            while(getline(file, line)) { nvars++; }
-            fip->file0_nvars = nvars;
         }
         file.close();
 
@@ -37,7 +29,7 @@ void processFileHeader(int nInt1, bool mb, bool rb, std::vector<std::string> lc_
 
         int header_i = 0;
         std::string header;
-        std::istringstream iss(headerLine);
+        std::istringstream iss(line);
         while (getline(iss, header, '\t')) 
         {
             header.erase(std::remove(header.begin(), header.end(), '\r'), header.end());

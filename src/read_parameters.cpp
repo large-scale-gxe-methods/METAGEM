@@ -107,13 +107,11 @@ void CommandLine::processCommandLine(int argc, char* argv[]) {
         outFile = outFile_in;
         std::ofstream results(outFile);
         if (!results) {
-            cerr << "\nERROR: Output file could not be opened.\n\n";
-            exit(1);
+            printOpenFileError(outFile);
         }
 
         if (results.fail()) {
-            cerr << "\nERROR: Output file could not be opened.\n\n";
-            exit(1);
+            printOpenFileError(outFile);
         }
 
         results << "test" << endl;
@@ -145,15 +143,17 @@ void CommandLine::processCommandLine(int argc, char* argv[]) {
         if (metaOpt == 0) {
             mb = true;
             rb = true;
+            cout << "Meta-analysis option: [model-based] and [robust].\n\n"; 
         } else if (metaOpt == 1) {
             mb = true;
+            cout << "Meta-analysis option: [model-based].\n\n";
         } else if (metaOpt == 2) {
             rb = true;
+            cout << "Meta-analysis option: [robust].\n\n";
         } else {
             cerr << "\nERROR: The --meta-option integer value must be 0, 1, or 2.\n\n";
             exit(1);
         }
-        
     }
     catch( const CLI::CallForHelp &e )
     {
