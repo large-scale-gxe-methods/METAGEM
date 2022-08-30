@@ -93,13 +93,22 @@ void CommandLine::processCommandLine(int argc, char* argv[]) {
         }
 
 
+
         // Exposure names
         std::set<std::string> s(intNames.begin(), intNames.end());
         if (s.size() != intNames.size()) {
             cerr << "\nERROR: There are duplicate exposure names (--exposure-names).\n\n";
             exit(1);
         }
-        nExp = intNames.size();
+        nInt = intNames.size();
+
+        lcIntNames = intNames;
+        for(std::string &s : lcIntNames){
+            std::transform(s.begin(), s.end(), s.begin(), [](char c){ return std::tolower(c); });
+            s = "g-" + s;
+        }
+        lcIntNames.insert(lcIntNames.begin(), "g");
+
 
 
         // Output file
@@ -133,6 +142,7 @@ void CommandLine::processCommandLine(int argc, char* argv[]) {
         }
 
         
+
         // Meta Option
         metaOpt = metaOpt_in;
         if (metaOpt < 0 || metaOpt > 2) {
@@ -143,7 +153,6 @@ void CommandLine::processCommandLine(int argc, char* argv[]) {
         if (metaOpt == 0) {
             mb = true;
             rb = true;
-
         } else if (metaOpt == 1) {
             mb = true;
         } else if (metaOpt == 2) {

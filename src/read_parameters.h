@@ -10,11 +10,12 @@ public:
 
     std::vector<std::string> fileNames;
     std::vector<std::string> intNames;
+    std::vector<std::string> lcIntNames;
 
     std::string outFile;
     std::string metaFileList;
 
-    size_t nExp;
+    size_t nInt;
     size_t nCov;
     int metaOpt;
 

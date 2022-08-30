@@ -35,9 +35,9 @@ class FileInfo {
         std::unordered_map<std::string, std::vector<int>> rb_covIntColumn;      
 };
 
-void processFileHeader(int Sq1, int metaOpt, std::vector<std::string> lc_intNames, std::vector<std::string> fileNames, FileInfo* fip);
+void processFileHeader(int nInt1, bool mb, bool rb, std::vector<std::string> lc_intNames, std::vector<std::string> fileNames, FileInfo* fip);
 
-void printOutputHeader(std::string output, int metaOpt, size_t Sq1, std::vector<std::string> intNames); 
+void printOutputHeader(bool mb, bool rb, std::string output, size_t nInt1, std::vector<std::string> intNames); 
 
 
 #endif
