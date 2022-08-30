@@ -1,12 +1,8 @@
 #include "metagem.h"
 
 
-void processFileHeader(int Sq1, int metaOpt, std::vector<std::string> lc_intNames, std::vector<std::string> fileNames, int* v, sparse_hash_map<std::string, int>* idx, FileInfo* fip) 
+void processFileHeader(int Sq1, int metaOpt, std::vector<std::string> lc_intNames, std::vector<std::string> fileNames, FileInfo* fip) 
 {
-
-    int vars = 0;
-    sparse_hash_map<std::string, int> snpid_idx;
-
     for (size_t f = 0; f < fileNames.size(); f++) {
 
         std::string fileName = fileNames[f];
@@ -27,6 +23,7 @@ void processFileHeader(int Sq1, int metaOpt, std::vector<std::string> lc_intName
         {
             getline(file, line);
         }
+        file.close();
 
         // Read the column headers
         std::unordered_map<std::string, int> columnNames;
@@ -124,7 +121,6 @@ void processFileHeader(int Sq1, int metaOpt, std::vector<std::string> lc_intName
         
 
 
-
         // Get the Beta Marginal column
         if (columnNames.find("Beta_Marginal") != columnNames.end())
         {
@@ -191,7 +187,7 @@ void processFileHeader(int Sq1, int metaOpt, std::vector<std::string> lc_intName
 
         if(nints != Sq1)
         {
-            cerr << "\nERROR: The file [" << fileName << "] does not contain the same number of interaction terms.\n\n";
+            cerr << "\nERROR: The file [" << fileName << "] does not contain the same number of interaction terms as --exposure-names.\n\n";
             exit(1);
         }
 
@@ -318,40 +314,7 @@ void processFileHeader(int Sq1, int metaOpt, std::vector<std::string> lc_intName
             }
             fip->rb_covIntColumn[fileName] = rb_covIntColumn;
         }
-
-
-
-        // Check if there are any results in the file and find unique variants
-        int count = 0;
-        while (getline(file, line)) {
-            std::istringstream iss(line);
-            std::string value;
-            std::vector <std::string> values;
-            while (getline(iss, value, '\t')) values.push_back(value);
-            std::string snpName = values[snpid_col];
-
-            sparse_hash_map<std::string, int>::iterator it = snpid_idx.find(snpName);
-            if (it == snpid_idx.end()) {
-                snpid_idx[snpName] = vars;
-                vars++;
-            }
-            count++;
-        }
-
-        if (count == 0 ) {
-            cerr << "\nERROR: No results in the file: " << fileName << ".\n\n";
-            file.close();
-            exit(1);
-        }
-        file.close();
-
-        fip->nvars[fileName] = count;
-
-        cout << "Read file [" << fileName << "] with " << std::to_string(count) << " variants.\n";
     }
-
-    *idx = snpid_idx;
-    *v   = vars;
 }
 
 
