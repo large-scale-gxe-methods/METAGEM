@@ -7,7 +7,6 @@ class FileInfo {
         int v = 0;
         int nBetas = 0;
         int fileCount = 0;
-        int file0_nvars = 0;
 
         std::vector<std::string> fileNames;
         std::vector<std::string> lc_betaIntNames;
