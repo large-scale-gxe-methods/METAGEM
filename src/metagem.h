@@ -13,6 +13,7 @@
 #include "matrix_utils.h"
 #include "read_parameters.h"
 #include "file.h"
+#include "print.h"
 
 #define VERSION "1.0"
 
@@ -23,7 +24,6 @@ using spp::sparse_hash_map;
 
 
 void metagem(CommandLine cmd);
-int flipAllele(std::string a1, std::string a2, std::string b1, std::string b2);
 
 template <class T>
 inline void hash_combine(std::size_t & seed, const T & v)

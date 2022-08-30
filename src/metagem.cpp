@@ -1,9 +1,11 @@
 #include "metagem.h"
 #include "time.h"
+#include "print.h"
 
 int main(int argc, char* argv[]) 
 {
-
+    printWelcome();
+    
     // Start Timers
     double wall0 = get_wall_time();
     double cpu0  = get_cpu_time();
@@ -17,9 +19,7 @@ int main(int argc, char* argv[])
     // Stop timers
     double wall1 = get_wall_time();
     double cpu1  = get_cpu_time();
-    cout << "\n*********************************************************\n";
-    cout << "Wall Time = " << wall1 - wall0 << " (sec)\n";
-    cout << "CPU Time  = " << cpu1  - cpu0  << " (sec)\n\n";
+    printTimeCompleted(wall0, wall1, cpu0, cpu1);
     
     return(0);
 }
@@ -27,6 +27,11 @@ int main(int argc, char* argv[])
 
 void metagem(CommandLine cmd)
 {
+    // Read the header of each file
+    printProcessingFiles();
+    FileInfo* fip = new FileInfo();
+    processFileHeader(cmd.nInt + 1, cmd.mb, cmd.rb, cmd.lcIntNames, cmd.fileNames, fip);
+
     // Initialize objects
     int nvars = 0;
     bool mb = cmd.mb;
@@ -35,30 +40,38 @@ void metagem(CommandLine cmd)
     size_t nInt1  = nInt + 1; // plus G
     size_t nFiles = cmd.fileNames.size();
 
+    int init = fip->file0_nvars;
     int nInt1_sq = nInt1 * nInt1;
-    std::vector<std::string> snpid;
-    std::vector<std::string> effectAllele;
-    std::vector<std::string> nonEffectAllele;
-    std::vector<double> nSamples;
-    std::vector<double> AF;
-    std::vector<size_t> nSeen;
+    std::vector<std::string> snpid(init);
+    std::vector<std::string> effectAllele(init);
+    std::vector<std::string> nonEffectAllele(init);
+    std::vector<double> nSamples(init, 0.0);
+    std::vector<double> AF(init, 0.0);
+    std::vector<size_t> nSeen(init, 0);
 
     std::vector<double> mb_MU;
-    std::vector<double> rb_MU;
     std::vector<double> mb_MV;
-    std::vector<double> rb_MV;
     std::vector<double> mb_U;
+    std::vector<double> mb_V;        
+    std::vector<double> rb_MU;
+    std::vector<double> rb_MV;
     std::vector<double> rb_U;
-    std::vector<double> mb_V;
     std::vector<double> rb_V;
+    
+    if (mb) {
+        mb_MU.resize(init);
+        mb_MV.resize(init);
+        mb_U.resize(init * nInt1);
+        mb_V.resize(init * nInt1_sq);        
+    }
+    if (rb) {
+        rb_MU.resize(init);
+        rb_MV.resize(init);
+        rb_U.resize(init * nInt1);
+        rb_V.resize(init * nInt1_sq);
+    }
 
     sparse_hash_map<std::pair<std::string, std::string>, int> snpid_idx;
-
-
-
-    // Read the header of each file
-    FileInfo* fip = new FileInfo();
-    processFileHeader(nInt1, mb, rb, cmd.lcIntNames, cmd.fileNames, fip);
     
     for (size_t f = 0; f < nFiles; f++)
     {
@@ -81,131 +94,53 @@ void metagem(CommandLine cmd)
         std::ifstream file;
         file.open(fileName);
         if (!file.is_open()) {
-            cerr << "\nERROR: Cannot open the file [" << fileName << "].\n\n";
+            printOpenFileError(fileName);
             exit(1);
         }
 
         // Ignore comments in the text file (ex. #dispersion: )
         std::string line;
         getline(file, line);
-        while(line.rfind("#", 0) == 0) { getline(file, line); }
-
 
         // Read in summary statistics
         int n = 0;
         std::string value;
         std::vector <std::string> values(nheader);
-        while(getline(file, line))
-        {
-            line.erase(std::remove(line.begin(), line.end(), '\r'), line.end());
-            
-            // Get values
-            int z = 0;
-            std::istringstream iss(line);
-            while (getline(iss, value, '\t')) {
-                values[z] = value;
-                z++;
-            }
-
-            if (z != nheader) {
-                cerr << "\nERROR: Unexpect number of columns (" << z << ") for variant number " << n+1 << "in file [" << fileName << "]. Expected: " << nheader << ".\n\n";
-                exit(1);
-            }
-
-            std::string snpName = values[snpColumn];
-            std::string chr = values[chrColumn];
-            std::string pos = values[posColumn];
-            std::string a1  = values[nonEffectColumn];
-            std::string a2  = values[effectColumn];
-            double file_ns  = std::stod(values[nSampleColumn]);
-            double file_af  = std::stod(values[afColumn]);
-
-            std::transform(a1.begin(), a1.end(), a1.begin(), [](char c){ return std::tolower(c); });
-            std::transform(a2.begin(), a2.end(), a2.begin(), [](char c){ return std::tolower(c); });
-
-            
-            std::string identifier = chr + ":" + pos;
-            std::string idA = identifier + ":" + a1 + ":" + a2;
-            std::string idB = identifier + ":" + a2 + ":" + a1;
-            std::pair<std::string, std::string> id = {idA, idB};
-            sparse_hash_map<std::pair<std::string, std::string>, int>::iterator it = snpid_idx.find(id);
-            if (it == snpid_idx.end()) {
-                snpid_idx[id] = nvars;
-                seen[idA] = 1;
-
-                snpid.push_back(snpName + "\t" + chr+ "\t" + pos + "\t" + a1 + "\t" + a2 + "\t");
-                nonEffectAllele.push_back(a1);
-                effectAllele.push_back(a2);
-                AF.push_back(file_af * 2.0 * file_ns);
-                nSamples.push_back(file_ns);
-                nSeen.push_back(1);
+        while(line.rfind("#", 0) == 0) { getline(file, line); }
+    
+        if (f == 0) {
+            while(getline(file, line))
+            {
+                line.erase(std::remove(line.begin(), line.end(), '\r'), line.end());
                 
-                // Matrix indices
-                int ui = nvars * nInt1;
-                int vi = nvars * nInt1_sq;
-
-                // Betas
-                double fileBM = std::stod(values[betaMargColumn]);
-                std::vector<double> fileBetaInt(nInt1);
-                for (size_t i = 0; i < nInt1; i++) {
-                    fileBetaInt[i] = std::stod(values[betaIntColumn[i]]);
+                // Get values
+                int z = 0;
+                std::istringstream iss(line);
+                while (getline(iss, value, '\t')) {
+                    values[z] = value;
+                    z++;
                 }
 
-                // Model-based
-                if (mb)
-                {
-                    // Marginal
-                    int mb_seMargColumn = fip->mb_seMargColumn[fileName];
-                    double mb_fileMV    = std::stod(values[mb_seMargColumn]);
-                    mb_MV.push_back(1 / (mb_fileMV * mb_fileMV));
-                    mb_MU.push_back(mb_MV[nvars] * (fileBM));
-
-                    // Interaction
-                    mb_U.resize(mb_U.size() + nInt1);
-                    std::vector<int> mb_covIntColumn = fip->mb_covIntColumn[fileName];
-                    for (size_t i = 0; i < nInt1; i++) {
-                        size_t isq = (i * nInt1);
-                        size_t ii  = vi + isq;
-                        for (size_t j = 0; j < nInt1; j++) {
-                            mb_V.push_back(std::stod(values[mb_covIntColumn[isq + j]]));
-                        }
-                        mb_V[ii + i] *= mb_V[ii + i];
-                    }
-
-                    // Add to main matrix
-                    subMatInv(&mb_V[0], nInt1, vi);
-                    subMatsubVecprod(&mb_V[0], &fileBetaInt[0], &mb_U[0], nInt1, nInt1, vi, 0, ui);
+                if (z != nheader) {
+                    printNColumnError(z, n + 1, fileName, nheader);
+                    exit(1);
                 }
 
-                // Robust
-                if (rb)
-                {
-                    // Marginal
-                    int rb_seMargColumn = fip->rb_seMargColumn[fileName];
-                    double rb_fileMV    = std::stod(values[rb_seMargColumn]);
+                std::string snpName = values[snpColumn];
+                std::string chr = values[chrColumn];
+                std::string pos = values[posColumn];
+                std::string a1  = values[nonEffectColumn];
+                std::string a2  = values[effectColumn];
+                double file_ns  = std::stod(values[nSampleColumn]);
+                double file_af  = std::stod(values[afColumn]);
+                std::transform(a1.begin(), a1.end(), a1.begin(), [](char c){ return std::tolower(c); });
+                std::transform(a2.begin(), a2.end(), a2.begin(), [](char c){ return std::tolower(c); });
 
-                    rb_MV.push_back(1 / (rb_fileMV * rb_fileMV));
-                    rb_MU.push_back(rb_MV[nvars] * (fileBM));
+                std::string identifier = chr + ":" + pos;
+                std::string idA = identifier + ":" + a1 + ":" + a2;
+                std::string idB = identifier + ":" + a2 + ":" + a1;
+                std::pair<std::string, std::string> id = {idA, idB};
 
-                    // Interaction
-                    rb_U.resize(rb_U.size() + nInt1);
-                    std::vector<int> rb_covIntColumn = fip->rb_covIntColumn[fileName];
-                    for (size_t i = 0; i < nInt1; i++) {
-                        size_t isq = (i * nInt1);
-                        size_t ii  = vi + isq;
-                        for (size_t j = 0; j < nInt1; j++) {
-                            rb_V.push_back(std::stod(values[rb_covIntColumn[isq + j]]));
-                        }
-                        rb_V[ii + i] *= rb_V[ii + i];
-                    }
-
-                    // Add to main matrix
-                    subMatInv(&rb_V[0], nInt1, vi);
-                    subMatsubVecprod(&rb_V[0], &fileBetaInt[0], &rb_U[0], nInt1, nInt1, vi, 0, ui);
-                }
-
-                nvars++;
-            } else {
                 sparse_hash_map<std::string, int>::iterator it2 = seen.find(idA);
                 if (it2 == seen.end()) {
                     seen[idA] = 1;
@@ -214,34 +149,24 @@ void metagem(CommandLine cmd)
                     continue;
                 }
 
-                int index = it->second;
-
-                int dir = 1.0;
-                std::string na = nonEffectAllele[index];
-                std::string ea = effectAllele[index];
-                if ((a1.compare(na) == 0) && (a2.compare(ea) == 0)) {
-                    AF[index] += file_af * 2.0 * file_ns;
-
-                }
-                else if ((a1.compare(ea) == 0) && (a2.compare(na) == 0)){
-                    dir = -1.0;
-                    AF[index] += (1 - file_af) * 2.0 * file_ns;
-
-                }
-
-                nSeen[index] += 1;
-                nSamples[index] += file_ns;
-
-
+                int index = nvars;
+                snpid_idx[id] = index;
+                snpid[index] = snpName + "\t" + chr+ "\t" + pos + "\t" + a1 + "\t" + a2 + "\t";
+                nonEffectAllele[index] = a1;
+                effectAllele[index]    = a2;
+                AF[index] = file_af * 2.0 * file_ns;
+                nSamples[index] = file_ns;
+                nSeen[index] = 1;
+                
                 // Matrix index
                 int ui = index * nInt1;
                 int vi = index * (nInt1 * nInt1);
 
                 // Betas
-                double fileBM = std::stod(values[betaMargColumn]) * dir;
+                double fileBM = std::stod(values[betaMargColumn]);
                 std::vector<double> fileBetaInt(nInt1);
                 for (size_t i = 0; i < nInt1; i++) {
-                    fileBetaInt[i] = std::stod(values[betaIntColumn[i]]) * dir;
+                    fileBetaInt[i] = std::stod(values[betaIntColumn[i]]);
                 }
 
                 // Model-based
@@ -315,18 +240,265 @@ void metagem(CommandLine cmd)
                         }
                     }
                 }
+
+                nvars++;
+                n++;
             }
-            n++;
+
+            if (n != nvars) {
+                snpid.resize(nvars);
+                effectAllele.resize(nvars);
+                nonEffectAllele.resize(nvars);
+                nSamples.resize(nvars);
+                AF.resize(nvars);
+                nSeen.resize(nvars);
+
+                if (mb) {
+                    mb_MU.resize(nvars);
+                    mb_MV.resize(nvars);
+                    mb_U.resize(nvars * nInt1);
+                    mb_V.resize(nvars * nInt1_sq);        
+                }
+                if (rb) {
+                    rb_MU.resize(nvars);
+                    rb_MV.resize(nvars);
+                    rb_U.resize(nvars * nInt1);
+                    rb_V.resize(nvars * nInt1_sq);
+                }
+            }
+        } else {
+            while(getline(file, line))
+            {
+                line.erase(std::remove(line.begin(), line.end(), '\r'), line.end());
+                
+                // Get values
+                int z = 0;
+                std::istringstream iss(line);
+                while (getline(iss, value, '\t')) {
+                    values[z] = value;
+                    z++;
+                }
+
+                if (z != nheader) {
+                    printNColumnError(z, n + 1, fileName, nheader);
+                    exit(1);
+                }
+
+                std::string snpName = values[snpColumn];
+                std::string chr = values[chrColumn];
+                std::string pos = values[posColumn];
+                std::string a1  = values[nonEffectColumn];
+                std::string a2  = values[effectColumn];
+                double file_ns  = std::stod(values[nSampleColumn]);
+                double file_af  = std::stod(values[afColumn]);
+                std::transform(a1.begin(), a1.end(), a1.begin(), [](char c){ return std::tolower(c); });
+                std::transform(a2.begin(), a2.end(), a2.begin(), [](char c){ return std::tolower(c); });
+
+                
+                std::string identifier = chr + ":" + pos;
+                std::string idA = identifier + ":" + a1 + ":" + a2;
+                std::string idB = identifier + ":" + a2 + ":" + a1;
+                std::pair<std::string, std::string> id = {idA, idB};
+                sparse_hash_map<std::pair<std::string, std::string>, int>::iterator it = snpid_idx.find(id);
+                if (it == snpid_idx.end()) {
+                    snpid_idx[id] = nvars;
+                    seen[idA] = 1;
+
+                    snpid.push_back(snpName + "\t" + chr+ "\t" + pos + "\t" + a1 + "\t" + a2 + "\t");
+                    nonEffectAllele.push_back(a1);
+                    effectAllele.push_back(a2);
+                    AF.push_back(file_af * 2.0 * file_ns);
+                    nSamples.push_back(file_ns);
+                    nSeen.push_back(1);
+                    
+                    // Matrix indices
+                    int ui = nvars * nInt1;
+                    int vi = nvars * nInt1_sq;
+
+                    // Betas
+                    double fileBM = std::stod(values[betaMargColumn]);
+                    std::vector<double> fileBetaInt(nInt1);
+                    for (size_t i = 0; i < nInt1; i++) {
+                        fileBetaInt[i] = std::stod(values[betaIntColumn[i]]);
+                    }
+
+                    // Model-based
+                    if (mb)
+                    {
+                        // Marginal
+                        int mb_seMargColumn = fip->mb_seMargColumn[fileName];
+                        double mb_fileMV    = std::stod(values[mb_seMargColumn]);
+                        double mb_margV     = 1 / (mb_fileMV * mb_fileMV);
+                        mb_MV.push_back(1 / (mb_fileMV * mb_fileMV));
+                        mb_MU.push_back(mb_margV * (fileBM));
+
+                        // Interaction
+                        mb_U.resize(mb_U.size() + nInt1);
+                        std::vector<int> mb_covIntColumn = fip->mb_covIntColumn[fileName];
+                        for (size_t i = 0; i < nInt1; i++) {
+                            size_t isq = (i * nInt1);
+                            size_t ii  = vi + isq;
+                            for (size_t j = 0; j < nInt1; j++) {
+                                mb_V.push_back(std::stod(values[mb_covIntColumn[isq + j]]));
+                            }
+                            mb_V[ii + i] *= mb_V[ii + i];
+                        }
+
+                        // Add to main matrix
+                        subMatInv(&mb_V[0], nInt1, vi);
+                        subMatsubVecprod(&mb_V[0], &fileBetaInt[0], &mb_U[0], nInt1, nInt1, vi, 0, ui);
+                    }
+
+                    // Robust
+                    if (rb)
+                    {
+                        // Marginal
+                        int rb_seMargColumn = fip->rb_seMargColumn[fileName];
+                        double rb_fileMV    = std::stod(values[rb_seMargColumn]);
+                        double rb_margV     = 1 / (rb_fileMV * rb_fileMV);
+                        rb_MV.push_back(1 / (rb_fileMV * rb_fileMV));
+                        rb_MU.push_back(rb_margV * (fileBM));
+
+                        // Interaction
+                        rb_U.resize(rb_U.size() + nInt1);
+                        std::vector<int> rb_covIntColumn = fip->rb_covIntColumn[fileName];
+                        for (size_t i = 0; i < nInt1; i++) {
+                            size_t isq = (i * nInt1);
+                            size_t ii  = vi + isq;
+                            for (size_t j = 0; j < nInt1; j++) {
+                                rb_V.push_back(std::stod(values[rb_covIntColumn[isq + j]]));
+                            }
+                            rb_V[ii + i] *= rb_V[ii + i];
+                        }
+
+                        // Add to main matrix
+                        subMatInv(&rb_V[0], nInt1, vi);
+                        subMatsubVecprod(&rb_V[0], &fileBetaInt[0], &rb_U[0], nInt1, nInt1, vi, 0, ui);
+                    }
+
+                    nvars++;
+                } else {
+                    sparse_hash_map<std::string, int>::iterator it2 = seen.find(idA);
+                    if (it2 == seen.end()) {
+                        seen[idA] = 1;
+                    } else {
+                        n++;
+                        continue;
+                    }
+
+                    int index = it->second;
+
+                    int dir = 1.0;
+                    std::string na = nonEffectAllele[index];
+                    std::string ea = effectAllele[index];
+                    if ((a1.compare(na) == 0) && (a2.compare(ea) == 0)) {
+                        AF[index] += file_af * 2.0 * file_ns;
+
+                    } else if ((a1.compare(ea) == 0) && (a2.compare(na) == 0)){
+                        dir = -1.0;
+                        AF[index] += (1 - file_af) * 2.0 * file_ns;
+                    }
+
+                    nSeen[index] += 1;
+                    nSamples[index] += file_ns;
+
+
+                    // Matrix index
+                    int ui = index * nInt1;
+                    int vi = index * (nInt1 * nInt1);
+
+                    // Betas
+                    double fileBM = std::stod(values[betaMargColumn]) * dir;
+                    std::vector<double> fileBetaInt(nInt1);
+                    for (size_t i = 0; i < nInt1; i++) {
+                        fileBetaInt[i] = std::stod(values[betaIntColumn[i]]) * dir;
+                    }
+
+                    // Model-based
+                    if (mb)
+                    {
+                        // Marginal
+                        int mb_seMargColumn = fip->mb_seMargColumn[fileName];
+                        double mb_fileMV = std::stod(values[mb_seMargColumn]);
+
+                        mb_fileMV = 1 / (mb_fileMV * mb_fileMV);
+                        mb_MV[index] += mb_fileMV;
+                        mb_MU[index] += (mb_fileMV * (fileBM));
+
+                        // Interactions
+                        std::vector<double> mb_fileU(nInt1);
+                        std::vector<double> mb_fileV(nInt1 * nInt1);
+                        std::vector<int> mb_covIntColumn = fip->mb_covIntColumn[fileName];
+
+                        for (size_t i = 0; i < nInt1; i++) {
+                            size_t ii = i * nInt1;
+                            for (size_t j = 0; j < nInt1; j++) {
+                                mb_fileV[ii + j] = std::stod(values[mb_covIntColumn[ii + j]]);
+                            }
+                            mb_fileV[ii + i] *= mb_fileV[ii + i];
+                        }
+
+                        // Add to main matrix
+                        matInv(&mb_fileV[0], nInt1);
+                        matvecprod(&mb_fileV[0], &fileBetaInt[0], &mb_fileU[0], nInt1, nInt1);
+                        for (size_t i = 0; i < nInt1; i++){
+                            size_t ii = i * nInt1;
+                            mb_U[ui + i] += mb_fileU[i];
+                            for (size_t j = 0; j < nInt1; j++) {
+                                mb_V[vi + ii + j] += mb_fileV[ii + j];
+                            }
+                        }
+                    }
+
+                    // Robust
+                    if (rb)
+                    {
+                        // Marginal
+                        int rb_seMargColumn = fip->rb_seMargColumn[fileName];
+                        double rb_fileMV = std::stod(values[rb_seMargColumn]);
+
+                        rb_fileMV = 1 / (rb_fileMV * rb_fileMV);
+                        rb_MV[index] += rb_fileMV;
+                        rb_MU[index] += (rb_fileMV * (fileBM));
+
+                        // Interactions
+                        std::vector<double> rb_fileU(nInt1);
+                        std::vector<double> rb_fileV(nInt1 * nInt1);
+                        std::vector<int> rb_covIntColumn = fip->rb_covIntColumn[fileName];
+                        
+                        for (size_t i = 0; i < nInt1; i++) {
+                            size_t ii = i * nInt1;
+                            for (size_t j = 0; j < nInt1; j++) {
+                                rb_fileV[ii + j] = std::stod(values[rb_covIntColumn[ii + j]]);
+                            }
+                            rb_fileV[ii + i] *= rb_fileV[ii + i];
+                        }
+
+                        // Add to main matrix
+                        matInv(&rb_fileV[0], nInt1);
+                        matvecprod(&rb_fileV[0], &fileBetaInt[0], &rb_fileU[0], nInt1, nInt1);
+                        for (size_t i = 0; i < nInt1; i++) {
+                            size_t ii = i * nInt1;
+                            rb_U[ui + i] += rb_fileU[i];
+                            for (size_t j = 0; j < nInt1; j++) {
+                                rb_V[vi + ii + j] += rb_fileV[ii + j];
+                            }
+                        }
+                    }
+                }
+                n++;
+            }
         }
         file.close();
 
         if (n == 0) {
-            cerr << "\nERROR: No variants in file [" << fileName << "].\n\n";
+            printZeroVariantsError(fileName);
             exit(1);
         }
 
-        cout << "Processed file [" << fileName << "] with " << std::to_string(n) << " variants.\n";
+        printProcessedFiles(fileName, n);
     }
+    printDone(2);
 
     // Create the output file and write column header names
     printOutputHeader(mb, rb, cmd.outFile, nInt1, cmd.intNames);
@@ -357,7 +529,8 @@ void metagem(CommandLine cmd)
     boost::math::chi_squared chisq_dist_Int(nInt);
     boost::math::chi_squared chisq_dist_Joint(nInt1);
 
-    cout << "\nPerforming meta-analysis with " << std::to_string(nFiles) << " files and " << std::to_string(nvars) << " variants...\n";
+
+    printMetaBegin(nFiles, nvars);
     for (int i = 0; i < nvars; i++)
     {
 
@@ -369,7 +542,6 @@ void metagem(CommandLine cmd)
 
         if (mb)
         {
-            subMatrix(&mb_V[0], VE, nInt, nInt, nInt1, nInt, iss + nInt1 + 1);
             subMatrix(&mb_V[0], Ai, nInt1, nInt1, nInt1, nInt1, iss);
             subMatInv(&mb_V[0], nInt1, iss);
 
@@ -384,6 +556,8 @@ void metagem(CommandLine cmd)
             subMatsubVecprod(&mb_V[0], &mb_U[0], mb_betaInt, nInt1, nInt1, iss, is, 0);
 
             // Model-based Int P-value
+            subMatrix(&mb_V[0], VE, nInt, nInt, nInt1, nInt, iss + nInt1 + 1);
+            matInv(VE, nInt);
             matvecSprod(VE, mb_betaInt, StempE, nInt, nInt, 1);
             double mb_statInt = 0.0;
             for (size_t j = 1; j < nInt1; j++) 
@@ -398,7 +572,7 @@ void metagem(CommandLine cmd)
             mb_pvalJoint = (std::isnan(mb_statJoint) || mb_statJoint <= 0.0) ? NAN : boost::math::cdf(complement(chisq_dist_Joint, mb_statJoint));
 
             // Print
-            oss << mb_betaMarg << "\t" << mb_varMarg << "\t";
+            oss << mb_betaMarg << "\t" << sqrt(mb_varMarg) << "\t";
             for (size_t j = 0; j < nInt1; j++) {
                 oss << mb_betaInt[j] << "\t";
             }
@@ -418,7 +592,6 @@ void metagem(CommandLine cmd)
 
         if (rb)
         {
-            subMatrix(&rb_V[0], VE, nInt, nInt, nInt1, nInt, iss + nInt1 + 1);
             subMatrix(&rb_V[0], Ai, nInt1, nInt1, nInt1, nInt1, iss);
             subMatInv(&rb_V[0], nInt1, iss);
 
@@ -433,6 +606,8 @@ void metagem(CommandLine cmd)
             subMatsubVecprod(&rb_V[0], &rb_U[0], rb_betaInt, nInt1, nInt1, iss, is, 0);
 
             // Robust Int P-value
+            subMatrix(&rb_V[0], VE, nInt, nInt, nInt1, nInt, iss + nInt1 + 1);
+            matInv(VE, nInt);
             matvecSprod(VE, rb_betaInt, StempE, nInt, nInt, 1);
             double rb_statInt = 0.0;
             for (size_t j = 1; j < nInt1; j++) 
@@ -447,7 +622,7 @@ void metagem(CommandLine cmd)
             rb_pvalJoint = (std::isnan(rb_statJoint) || rb_statJoint <= 0.0) ? NAN : boost::math::cdf(complement(chisq_dist_Joint, rb_statJoint));
 
             // Print
-            oss << rb_betaMarg << "\t" << rb_varMarg << "\t";
+            oss << rb_betaMarg << "\t" << sqrt(rb_varMarg) << "\t";
             for (size_t j = 0; j < nInt1; j++) {
                 oss << rb_betaInt[j] << "\t";
             }
@@ -484,6 +659,6 @@ void metagem(CommandLine cmd)
     delete[] Ai;
     delete[] VE;
 
-    cout << "Done.\n\n";
-    cout << "Results are in [" << cmd.outFile << "].";
+    printDone(2);
+    printOutputLocation(cmd.outFile);
 }

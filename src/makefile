@@ -7,8 +7,8 @@ CXXFLAGS = -std=c++11 -O3 -pg -Wall
 
 LIBS= -lmkl_gf_lp64 -lmkl_sequential -lmkl_core -ldl -lm 
 
-CXX_SOURCES= matrix_utils.cpp read_parameters.cpp file.cpp metagem.cpp
-CXX_OBJECTS= matrix_utils.o read_parameters.o file.o metagem.o
+CXX_SOURCES= matrix_utils.cpp read_parameters.cpp print.cpp file.cpp metagem.cpp
+CXX_OBJECTS= matrix_utils.o read_parameters.o print.o file.o metagem.o
 OBJS= $(CXX_OBJECTS)
 
 #targets

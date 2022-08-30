@@ -1,20 +1,17 @@
 #ifndef FILE_H
 #define FILE_H
 
-#include "../include/sparsepp-2018.2/spp.h"
-using spp::sparse_hash_map;
-
 class FileInfo {
     public:
 
         int v = 0;
-        int fileCount = 0;
         int nBetas = 0;
+        int fileCount = 0;
+        int file0_nvars = 0;
 
         std::vector<std::string> fileNames;
         std::vector<std::string> lc_betaIntNames;
         std::vector<std::string> betaIntNames;
-
 
         // Indices
         std::unordered_map<std::string, int> nheader;
@@ -36,7 +33,6 @@ class FileInfo {
 };
 
 void processFileHeader(int nInt1, bool mb, bool rb, std::vector<std::string> lc_intNames, std::vector<std::string> fileNames, FileInfo* fip);
-
 void printOutputHeader(bool mb, bool rb, std::string output, size_t nInt1, std::vector<std::string> intNames); 
 
 

@@ -9,14 +9,6 @@ void print_help();
 // Function to process command line arguments
 void CommandLine::processCommandLine(int argc, char* argv[]) {
 
-
-    cout << "\n*********************************************************\n";
-    cout << "Welcome to METAGEM v" << VERSION << "\n";
-    cout << "(C) 2021 Duy Pham and Han Chen \n";
-    cout << "GNU General Public License v3\n";
-    cout << "*********************************************************\n";
-
-
     // GEM options. Details are printed from the print_help() function below.
     CLI::App app{""};
 
