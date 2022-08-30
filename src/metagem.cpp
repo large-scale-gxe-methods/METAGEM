@@ -447,7 +447,7 @@ void metagem(CommandLine cmd)
 
             // Model-based Int P-value
             subMatrix(&mb_V[0], VE, nExp, nExp, Sq1, nExp, iss + Sq1 + 1);
-            matInv(VE, 1);
+            matInv(VE, nExp);
             matvecSprod(VE, mb_betaInt, StempE, nExp, nExp, 1);
             double mb_statInt = 0.0;
             for (size_t j = 1; j < nExp1; j++) 
@@ -480,7 +480,7 @@ void metagem(CommandLine cmd)
 
             // Robust Int P-value
             subMatrix(&rb_V[0], VE, nExp, nExp, Sq1, nExp, iss + Sq1 + 1);
-            matInv(VE, 1);
+            matInv(VE, nExp);
             matvecSprod(VE, rb_betaInt, StempE, nExp, nExp, 1);
             double rb_statInt = 0.0;
             for (size_t j = 1; j < nExp1; j++) 
