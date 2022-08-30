@@ -391,3 +391,10 @@ void printOutputHeader(bool mb, bool rb, std::string output, size_t nInt1, std::
     
     results.close();
 }
+
+
+void printHeaderMissingError(std::string fileName, std::string column) {
+    cerr << "\nERROR: The file [" << fileName << "] does not contain a " << column << " column.\n\n";
+}
+
+

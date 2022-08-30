@@ -13,7 +13,6 @@
 #include "matrix_utils.h"
 #include "read_parameters.h"
 #include "file.h"
-#include "print.h"
 
 #define VERSION "1.0"
 
@@ -46,4 +45,14 @@ namespace std
   };
 }
 
+void printWelcome();
+void printMetaBegin(int nFiles, int nvars);
+void printProcessedFiles(std::string fileName, int n);
+void printProcessingFiles();
+void printDone(int nbs);
+void printOutputLocation(std::string outFile);
+void printZeroVariantsError(std::string fileName);
+void printNColumnError(int z, int n, std::string fileName, int nheader);
+void printOpenFileError(std::string fileName);
+void printTimeCompleted(double wall0, double wall1, double cpu0, double cpu1);
 #endif
