@@ -7,20 +7,21 @@
 
 class CommandLine {
 public:
-	// Input files
-	std::vector<std::string> fileNames;
-	std::vector<std::string> intNames;
 
-	size_t nExp;
-	size_t nCov;
-	std::string outFile;
-	std::string metaFileList;
+    std::vector<std::string> fileNames;
+    std::vector<std::string> intNames;
 
-	int metaOpt;
-	bool mb = false;
-	bool rb = false;
+    std::string outFile;
+    std::string metaFileList;
 
-	void processCommandLine(int argc, char* argv[]);
+    size_t nExp;
+    size_t nCov;
+    int metaOpt;
+
+    bool mb = false;
+    bool rb = false;
+
+    void processCommandLine(int argc, char* argv[]);
 };
 
 
