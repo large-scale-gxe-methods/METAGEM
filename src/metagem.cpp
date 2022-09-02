@@ -361,7 +361,6 @@ void metagem(CommandLine cmd)
             subMatrix(&mb_V[0], Ai, nInt1, nInt1, nInt1, nInt1, iss);
             subMatInv(&mb_V[0], nInt1, iss);
             subMatrix(&mb_V[0], VE, nInt, nInt, nInt1, nInt, iss + nInt1 + 1);
-            matInv(VE, nInt);
 
             // Model-based Marginal Variance
             vMarg = mb_MV[i];
@@ -380,12 +379,13 @@ void metagem(CommandLine cmd)
 
 
             // Int P-value
-            for (size_t j = 0; j < nInt1; j++) {
-                for (size_t k = 0; k < nInt1; k++) {
-                    StempE[j] += (VE[(nInt1 * j) + k] * betaInt[k + 1]);
+            matInv(VE, nInt);
+            for (size_t j = 0; j < nInt; j++) {
+                for (size_t k = 0; k < nInt; k++) {
+                    StempE[j] += (VE[(nInt * j) + k] * betaInt[k + 1]);
                 }
             }
-
+            
             statInt = 0.0;
             for (size_t j = 1; j < nInt1; j++) 
                 statInt += betaInt[j] * StempE[j-1];
@@ -432,7 +432,6 @@ void metagem(CommandLine cmd)
             subMatrix(&rb_V[0], Ai, nInt1, nInt1, nInt1, nInt1, iss);
             subMatInv(&rb_V[0], nInt1, iss);
             subMatrix(&rb_V[0], VE, nInt, nInt, nInt1, nInt, iss + nInt1 + 1);
-            matInv(VE, nInt);
 
             // Robust Marginal Variance
             vMarg = rb_MV[i];
@@ -451,9 +450,10 @@ void metagem(CommandLine cmd)
 
 
             // Int P-value
+            matInv(VE, nInt);
             for (size_t j = 0; j < nInt; j++) {
                 for (size_t k = 0; k < nInt; k++) {
-                    StempE[j] += (VE[(nInt1 * j) + k] * betaInt[k + 1]);
+                    StempE[j] += (VE[(nInt * j) + k] * betaInt[k + 1]);
                 }
             }
 
