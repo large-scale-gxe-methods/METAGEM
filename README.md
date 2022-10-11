@@ -1,7 +1,7 @@
 # METAGEM
 
 
-METAGEM (Meta-analysis of GEM interaction results) is a software program for meta-analysis of large-scale gene-environment testing results, including multi-exposure interaction, joint, and marginal tests. It uses results directly from [GEM](https://github.com/large-scale-gxe-methods/GEM) output.
+METAGEM (META-analysis of GEM summary statistics) is a software program for meta-analysis of large-scale gene-environment testing results, including multi-exposure interaction, joint, and marginal tests. It uses results directly from [GEM](https://github.com/large-scale-gxe-methods/GEM) output.
 
 
 Current version: 1.0
@@ -37,7 +37,7 @@ make
 ### Command Line Options
 
 Once METAGEM is installed, the executable ```./METAGEM``` can be used to run the program.
-For a list of options, use ```cd METAGEM/src./METAGEM -help```.
+For a list of options, use ```./METAGEM -help```.
 
 <details>
      <summary> <b>List of Options</b> </summary>
@@ -80,11 +80,11 @@ Input/Output File Options:
 
 ### Input Files
 
-METAGEM directly uses output files from GEM (v1.4.1 and up, with use of --output-style: 'meta' or 'full').
+METAGEM uses output files from GEM (v1.4.1 and up, with use of --output-style: 'meta' or 'full').
 
 ### Input File List
 
-A no header txt file containing a single line input file name per line.
+A no header txt file containing a single input file name per line.
 
 ### Output File Format
 
@@ -125,6 +125,7 @@ robust_P_Value_Joint       - Joint test p-value (K+1 degrees of freedom test of 
 ```
 
 <br />
+
 The --meta-option flag can be used to specify which columns should be included in the output file:
 
 * 0: Both model-based and robust summary statistics.
@@ -136,7 +137,7 @@ The --meta-option flag can be used to specify which columns should be included i
 <br />
 
 ```unix
-./METAGEM --input-file-list METAGEM_input_file_list.txt --exposure-names cov1 --out metagem.out
+./METAGEM --input-files file1.out file2.out file3.out --exposure-names cov1 --out metagem.out
 ```
 <br />
 <br />
@@ -150,8 +151,8 @@ For comments, suggestions, bug reports and questions, please contact Han Chen (H
 ## License 
 
  ```
- GEM : Gene-Environment interaction analysis for Millions of samples
- Copyright (C) 2018-2021  Liang Hong, Han Chen, Duy Pham, Cong Pan
+ METAGEM: META-analysis of GEM summary statistics
+ Copyright (C) 2022 Duy T. Pham and Han Chen
  
  This program is free software: you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
