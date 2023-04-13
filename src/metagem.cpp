@@ -1,5 +1,5 @@
 // <METAGEM: META-analysis of GEM summary statistics>
-// Copyright (C) <2022> Duy T. Pham and Han Chen 
+// Copyright (C) <2021-2023> Duy T. Pham and Han Chen 
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -538,7 +538,7 @@ void metagem(CommandLine cmd)
 void printWelcome() {
     cout << "\n*********************************************************\n";
     cout << "Welcome to METAGEM v" << VERSION << "\n";
-    cout << "(C) 2021-2022 Duy Pham and Han Chen \n";
+    cout << "(C) 2021-2023 Duy Pham and Han Chen \n";
     cout << "GNU General Public License v3\n";
     cout << "*********************************************************\n";
 }

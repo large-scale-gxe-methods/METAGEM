@@ -174,7 +174,7 @@ void print_help() {
     cout << "Input File Options: " << endl
         << "   --input-files \t Output files from GEM 'meta' or 'full' option." << endl
         << "   --input-file-list \t A no header text file containing a single file name per line." << endl
-        << "   --exposure-names \t The names of the exposures." << endl
+        << "   --exposure-names \t The names of the exposure(s) to be included in the meta-analysis." << endl
         << "   --out \t\t Full path and extension to where METAGEM output results. \n \t\t\t    Default: metagem.out" << endl
         << "   --meta-option \t Integer value indicating which summary statistics should be used for meta-analysis. \n\t\t\t    0: Both model-based and robust summary statistics. \n \t\t\t    1: model-based summary statistics. \n \t\t\t    2: robust summary statistics. \n \t\t\t    Default: 0" << endl;
     cout << endl << endl;
