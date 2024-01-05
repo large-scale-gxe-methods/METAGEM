@@ -15,13 +15,15 @@ void CommandLine::processCommandLine(int argc, char* argv[]) {
     // Defaults
     int metaOpt_in = 0;
     std::string outFile_in = "metagem.out";
+    std::vector<std::string> additionalTests;
 
     app.add_option("--input-files", fileNames, "")->expected(0, 1000000);
     app.add_option("--input-file-list", metaFileList, "")->expected(1);
     app.add_option("--exposure-names", intNames, "")->expected(1, 1000000)->required();
     app.add_option("--out", outFile_in, "")->expected(1);
     app.add_option("--meta-option", metaOpt_in, "");
-
+    app.add_option("--additional-test", additionalTests, "Specify one or more additional tests to run") -> expected(1, 100);
+  
     try
     {
         app.parse( argc, argv);
@@ -177,6 +179,7 @@ void print_help() {
         << "   --exposure-names \t The names of the exposure(s) to be included in the meta-analysis." << endl
         << "   --out \t\t Full path and extension to where METAGEM output results. \n \t\t\t    Default: metagem.out" << endl
         << "   --meta-option \t Integer value indicating which summary statistics should be used for meta-analysis. \n\t\t\t    0: Both model-based and robust summary statistics. \n \t\t\t    1: model-based summary statistics. \n \t\t\t    2: robust summary statistics. \n \t\t\t    Default: 0" << endl;
+        << "   --additional-test \t Specify one or more additional tests to run." << endl
     cout << endl << endl;
     cout << endl << endl;
 }
