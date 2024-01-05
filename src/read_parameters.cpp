@@ -15,7 +15,6 @@ void CommandLine::processCommandLine(int argc, char* argv[]) {
     // Defaults
     int metaOpt_in = 0;
     std::string outFile_in = "metagem.out";
-    std::vector<std::string> additionalTests;
 
     app.add_option("--input-files", fileNames, "")->expected(0, 1000000);
     app.add_option("--input-file-list", metaFileList, "")->expected(1);
