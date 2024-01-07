@@ -15,7 +15,7 @@ public:
     std::vector<std::string> lcIntNames2;
 
     std::string outFile;
-    std::string outfile2
+    std::string outFile2;
     std::string metaFileList;
     std::vector<std::string> additionalTest;
 
