@@ -27,6 +27,7 @@ class FileInfo {
         std::unordered_map<std::string, int> rb_seMargColumn;
 
         std::unordered_map<std::string, std::vector<int>> betaIntColumn;
+        std::unordered_map<std::string, std::vector<int>> betaIntColumn2;
         std::unordered_map<std::string, std::vector<int>> mb_covIntColumn;
         std::unordered_map<std::string, std::vector<int>> rb_covIntColumn;      
 };
