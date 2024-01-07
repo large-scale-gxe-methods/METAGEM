@@ -17,7 +17,7 @@ public:
     std::string outFile;
     std::string outFile2;
     std::string metaFileList;
-    std::vector<std::string> additionalTest;
+    std::vector<std::string> additionalTestInfo;
 
     size_t nInt;
     size_t nInt2;
@@ -26,7 +26,7 @@ public:
 
     bool mb = false;
     bool rb = false;
-
+    bool additionalTest = false;
     void processCommandLine(int argc, char* argv[]);
 };
 
