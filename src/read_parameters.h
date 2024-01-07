@@ -14,7 +14,7 @@ public:
 
     std::string outFile;
     std::string metaFileList;
-    std::vector<std::string> additionalTests;
+    std::vector<std::string> additionalTest;
 
     size_t nInt;
     size_t nCov;
