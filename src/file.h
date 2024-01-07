@@ -33,7 +33,7 @@ class FileInfo {
 };
 
 void processFileHeader(int nInt1, int nInt2, bool mb, bool rb, bool additionalTest, std::vector<std::string> lc_intNames, std::vector<std::string> lc_intNames2, std::vector<std::string> fileNames, FileInfo* fip);
-void printOutputHeader(bool mb, bool rb, bool additionalTest, std::string output, size_t nInt1, size_t nInt2, std::vector<std::string> intNames, std::vector<std::string> intNames2); 
+void printOutputHeader(bool mb, bool rb, bool additionalTest, std::string output, std::string output2, size_t nInt1, size_t nInt2, std::vector<std::string> intNames, std::vector<std::string> intNames2); 
 void printHeaderMissingError(std::string fileName, std::string column);
 
 #endif
