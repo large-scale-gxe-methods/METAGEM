@@ -46,7 +46,7 @@ void metagem(CommandLine cmd)
     // Read the header of each file
     printProcessingFiles();
     FileInfo* fip = new FileInfo();
-    processFileHeader(cmd.nInt + 1, cmd.mb, cmd.rb, cmd.lcIntNames, cmd.fileNames, fip);
+    processFileHeader(cmd.nInt + 1, cmd.nInt2, cmd.mb, cmd.rb, cmd.lcIntNames, cmd.lcIntNames2, cmd.fileNames, fip);
 
     // Initialize objects
     int nvars = 0;
