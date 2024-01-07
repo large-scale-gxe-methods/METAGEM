@@ -155,6 +155,51 @@ void CommandLine::processCommandLine(int argc, char* argv[]) {
             cerr << "\nERROR: The --meta-option integer value must be 0, 1, or 2.\n\n";
             exit(1);
         }
+
+        // Additional test
+        if (!additionalTest.empty()) {
+          intNames2.assign(additionalTest.begin(), additionalTest.end() - 1);
+          outfile2 = additionalTest.back();
+          std::set<std::string> s(intNames.begin(), intNames.end());
+          if (s.size() != intNames2.size()) {
+              cerr << "\nERROR: There are duplicate variable names in the additional test.\n\n";
+              exit(1);
+          }
+          nInt2 = intNames2.size();
+
+          lcIntNames2 = intNames2;
+          for(std::string &s : lcIntNames2){
+              std::transform(s.begin(), s.end(), s.begin(), [](char c){ return std::tolower(c); });
+              s = "g-" + s;
+          }
+
+          // Additional output file
+          std::ofstream results2(outFile2);
+          if (!results2) {
+              printOpenFileError(outFile2);
+          }
+
+          if (results2.fail()) {
+              printOpenFileError(outFile2);
+          }
+
+          results2 << "test" << endl;
+          if (results2.fail()) {
+              cerr << "\nERROR: Cannot write to the additional output file.\n\n";
+              results2.close();
+            
+              if (std::remove(outFile2.c_str()) != 0) {
+                  cerr << "\nERROR: Cannot delete the additional output file.\n\n";
+              }
+              exit(1);
+          }
+          results2.close();
+        
+          if (std::remove(outFile2.c_str()) != 0) {
+              cerr << "\nERROR: Cannot delete the additional output file.\n\n";
+              exit(1);
+          }
+        }
     }
     catch( const CLI::CallForHelp &e )
     {
