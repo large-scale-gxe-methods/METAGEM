@@ -1,6 +1,6 @@
 #include "metagem.h"
 
-void processFileHeader(int nInt1, bool mb, bool rb, std::vector<std::string> lc_intNames, std::vector<std::string> fileNames, FileInfo* fip) 
+void processFileHeader(int nInt1, int nInt2, bool mb, bool rb, std::vector<std::string> lc_intNames, std::vector<std::string> lc_intNames2, std::vector<std::string> fileNames, FileInfo* fip) 
 {
     for (size_t f = 0; f < fileNames.size(); f++) {
 
@@ -342,14 +342,14 @@ void processFileHeader(int nInt1, bool mb, bool rb, std::vector<std::string> lc_
             // Get columns containing the model-based summary statistics for the interaction terms
             if (mb)
             {
-                std::vector<int> mb_covIntColumn(nints * nints);
+                std::vector<int> mb_covIntColumn2(nInt2 * nInt2);
 
-                for (int i = 0; i < nints; i++) 
+                for (int i = 0; i < nInt2; i++) 
                 {
-                    std::string s1 = "SE_Beta_" + ord_betaIntNames[i];
+                    std::string s1 = "SE_Beta_" + ord_betaIntNames2[i];
                     if (columnNames.find(s1) != columnNames.end()) 
                     {
-                        mb_covIntColumn[i*nints + i] = columnNames[s1];
+                        mb_covIntColumn2[i*nInt2 + i] = columnNames[s1];
                     }
                     else 
                     {
@@ -358,13 +358,13 @@ void processFileHeader(int nInt1, bool mb, bool rb, std::vector<std::string> lc_
                     }
                 }
 
-                for (int i = 0; i < nints; i++) 
+                for (int i = 0; i < nInt2; i++) 
                 {
-                    for (int j = i+1; j < nints; j++) 
+                    for (int j = i+1; j < nInt2; j++) 
                     {
                         int idx;
-                        std::string s2 = "Cov_Beta_" + ord_betaIntNames[i] + "_" + ord_betaIntNames[j];
-                        std::string s3 = "Cov_Beta_" + ord_betaIntNames[j] + "_" + ord_betaIntNames[i];
+                        std::string s2 = "Cov_Beta_" + ord_betaIntNames2[i] + "_" + ord_betaIntNames2[j];
+                        std::string s3 = "Cov_Beta_" + ord_betaIntNames2[j] + "_" + ord_betaIntNames2[i];
                         if (columnNames.find(s2) != columnNames.end()) 
                         {
                             idx = columnNames[s2];
@@ -378,24 +378,24 @@ void processFileHeader(int nInt1, bool mb, bool rb, std::vector<std::string> lc_
                             cerr << "\nERROR: The file [" <<  fileName << "] does not contain the column " << s2 << " or " << s3 << ".\n\n";
                             exit(1);
                         }
-                        mb_covIntColumn[(i * nints) + j] = idx;
-                        mb_covIntColumn[(j * nints) + i] = idx;
+                        mb_covIntColumn2[(i * nInt2) + j] = idx;
+                        mb_covIntColumn2[(j * nInt2) + i] = idx;
                     }
                 }
-                fip->mb_covIntColumn[fileName] = mb_covIntColumn;
+                fip->mb_covIntColumn2[fileName] = mb_covIntColumn2;
             }
 
 
             // Get columns containing the robust summary statistics for the interaction terms	
             if (rb)
             {
-                std::vector<int> rb_covIntColumn(nints * nints);
-                for (int i = 0; i < nints; i++) 
+                std::vector<int> rb_covIntColumn2(nInt2 * nInt2);
+                for (int i = 0; i < nInt2; i++) 
                 {
-                    std::string s1 = "robust_SE_Beta_" + ord_betaIntNames[i];
+                    std::string s1 = "robust_SE_Beta_" + ord_betaIntNames2[i];
                     if (columnNames.find(s1) != columnNames.end()) 
                     {
-                        rb_covIntColumn[i*nints + i] = columnNames[s1];
+                        rb_covIntColumn2[i*nInt2 + i] = columnNames[s1];
                     }
                     else 
                     {
@@ -404,13 +404,13 @@ void processFileHeader(int nInt1, bool mb, bool rb, std::vector<std::string> lc_
                     }
                 }
 
-                for (int i = 0; i < nints; i++) 
+                for (int i = 0; i < nInt2; i++) 
                 {
-                    for (int j = i+1; j < nints; j++) 
+                    for (int j = i+1; j < nInt2; j++) 
                     {
                         int idx;
-                        std::string s2 = "robust_Cov_Beta_" + ord_betaIntNames[i] + "_" + ord_betaIntNames[j];
-                        std::string s3 = "robust_Cov_Beta_" + ord_betaIntNames[j] + "_" + ord_betaIntNames[i];
+                        std::string s2 = "robust_Cov_Beta_" + ord_betaIntNames2[i] + "_" + ord_betaIntNames2[j];
+                        std::string s3 = "robust_Cov_Beta_" + ord_betaIntNames2[j] + "_" + ord_betaIntNames2[i];
 
                         if (columnNames.find(s2) != columnNames.end()) 
                         {
@@ -425,11 +425,11 @@ void processFileHeader(int nInt1, bool mb, bool rb, std::vector<std::string> lc_
                             cerr << "\nERROR: The file [" <<  fileName << "] does not contain the column " << s2 << " or " << s3 << ".\n\n";
                             exit(1);
                         }
-                        rb_covIntColumn[(i * nints) + j] = idx;
-                        rb_covIntColumn[(j * nints) + i] = idx;
+                        rb_covIntColumn2[(i * nInt2) + j] = idx;
+                        rb_covIntColumn2[(j * nInt2) + i] = idx;
                     }
                 }
-                fip->rb_covIntColumn[fileName] = rb_covIntColumn;
+                fip->rb_covIntColumn2[fileName] = rb_covIntColumn2;
             }
         }
     }
