@@ -316,62 +316,25 @@ void processFileHeader(int nInt1, bool mb, bool rb, std::vector<std::string> lc_
 
         // Additional test
         if(additionalTest){
-            int nints = 0;
-            std::vector<std::string> betaIntNames;
-            if (columnNames.find("Beta_G") == columnNames.end()) {
-                printHeaderMissingError(fileName, "Beta_G");
-                exit(1);
-            }
-            else
-            {
-                betaIntNames.push_back("G");
-                nints++;
-
-                for (std::pair<std::string, int> element : columnNames)
-                {
-                    std::string key = element.first;
-                    if (key.rfind("Beta_G-", 0) == 0) {
-                        key.erase(0, 5);
-                        betaIntNames.push_back(key);
-                        nints++;
-                    }
-                }
-            }
-
-
-            if(nints != nInt1)
-            {
-                cerr << "\nERROR: The file [" << fileName << "] does not contain the same number of interaction terms as --exposure-names.\n\n";
-                exit(1);
-            }
-
-
-            // Convert to lowercase strings for matching
-            std::vector<std::string> lc_betaIntNames = betaIntNames;
-            for(std::string &s : lc_betaIntNames)
-            {
-                std::transform(s.begin(), s.end(), s.begin(), [](char c){ return std::tolower(c); });
-            }
-            
             // Order the interactions base on the first vector of interactions
-            std::vector<int> betaIntColumn;
-            std::vector<std::string> ord_betaIntNames;
-            for (int i = 0; i < nInt1; i++)
+            std::vector<int> betaIntColumn2;
+            std::vector<std::string> ord_betaIntNames2;
+            for (int i = 0; i < nInt2; i++)
             {
-                auto it = std::find(lc_betaIntNames.begin(), lc_betaIntNames.end(), lc_intNames[i]);
+                auto it = std::find(lc_betaIntNames.begin(), lc_betaIntNames.end(), lc_intNames2[i]);
                 if (it != lc_betaIntNames.end())
                 {
                     auto idx = std::distance(lc_betaIntNames.begin(), it);
-                    ord_betaIntNames.push_back(betaIntNames[idx]);
-                    betaIntColumn.push_back(columnNames["Beta_" + betaIntNames[idx]]);
+                    ord_betaIntNames2.push_back(betaIntNames[idx]);
+                    betaIntColumn2.push_back(columnNames["Beta_" + betaIntNames[idx]]);
                 }
                 else 
                 {
-                    cerr << "\nERROR: The file [" << fileName << "] does not contain the GxE term: " << lc_intNames[i] << ".\n\n";
+                    cerr << "\nERROR: The file [" << fileName << "] does not contain the GxE term: " << lc_intNames2[i] << ".\n\n";
                     exit(1);
                 }
             }
-            fip->betaIntColumn[fileName] = betaIntColumn;
+            fip->betaIntColumn2[fileName] = betaIntColumn2;
 
         
 
