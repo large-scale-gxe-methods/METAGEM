@@ -171,7 +171,9 @@ void CommandLine::processCommandLine(int argc, char* argv[]) {
           lcIntNames2 = intNames2;
           for(std::string &s : lcIntNames2){
               std::transform(s.begin(), s.end(), s.begin(), [](char c){ return std::tolower(c); });
-              s = "g-" + s;
+              if (s != "g") {
+                s = "g-" + s;
+              }
           }
 
           // Additional output file
