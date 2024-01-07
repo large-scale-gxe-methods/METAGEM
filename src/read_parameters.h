@@ -13,11 +13,11 @@ public:
     std::vector<std::string> lcIntNames;
     std::vector<std::string> intNames2;
     std::vector<std::string> lcIntNames2;
+    std::vector<std::string> additionalTestInfo;
 
     std::string outFile;
     std::string outFile2;
     std::string metaFileList;
-    std::vector<std::string> additionalTestInfo;
 
     size_t nInt;
     size_t nInt2;
