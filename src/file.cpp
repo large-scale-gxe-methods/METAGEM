@@ -313,6 +313,162 @@ void processFileHeader(int nInt1, bool mb, bool rb, std::vector<std::string> lc_
             }
             fip->rb_covIntColumn[fileName] = rb_covIntColumn;
         }
+
+        // Additional test
+        if(additionalTest){
+            int nints = 0;
+            std::vector<std::string> betaIntNames;
+            if (columnNames.find("Beta_G") == columnNames.end()) {
+                printHeaderMissingError(fileName, "Beta_G");
+                exit(1);
+            }
+            else
+            {
+                betaIntNames.push_back("G");
+                nints++;
+
+                for (std::pair<std::string, int> element : columnNames)
+                {
+                    std::string key = element.first;
+                    if (key.rfind("Beta_G-", 0) == 0) {
+                        key.erase(0, 5);
+                        betaIntNames.push_back(key);
+                        nints++;
+                    }
+                }
+            }
+
+
+            if(nints != nInt1)
+            {
+                cerr << "\nERROR: The file [" << fileName << "] does not contain the same number of interaction terms as --exposure-names.\n\n";
+                exit(1);
+            }
+
+
+            // Convert to lowercase strings for matching
+            std::vector<std::string> lc_betaIntNames = betaIntNames;
+            for(std::string &s : lc_betaIntNames)
+            {
+                std::transform(s.begin(), s.end(), s.begin(), [](char c){ return std::tolower(c); });
+            }
+            
+            // Order the interactions base on the first vector of interactions
+            std::vector<int> betaIntColumn;
+            std::vector<std::string> ord_betaIntNames;
+            for (int i = 0; i < nInt1; i++)
+            {
+                auto it = std::find(lc_betaIntNames.begin(), lc_betaIntNames.end(), lc_intNames[i]);
+                if (it != lc_betaIntNames.end())
+                {
+                    auto idx = std::distance(lc_betaIntNames.begin(), it);
+                    ord_betaIntNames.push_back(betaIntNames[idx]);
+                    betaIntColumn.push_back(columnNames["Beta_" + betaIntNames[idx]]);
+                }
+                else 
+                {
+                    cerr << "\nERROR: The file [" << fileName << "] does not contain the GxE term: " << lc_intNames[i] << ".\n\n";
+                    exit(1);
+                }
+            }
+            fip->betaIntColumn[fileName] = betaIntColumn;
+
+        
+
+
+            // Get columns containing the model-based summary statistics for the interaction terms
+            if (mb)
+            {
+                std::vector<int> mb_covIntColumn(nints * nints);
+
+                for (int i = 0; i < nints; i++) 
+                {
+                    std::string s1 = "SE_Beta_" + ord_betaIntNames[i];
+                    if (columnNames.find(s1) != columnNames.end()) 
+                    {
+                        mb_covIntColumn[i*nints + i] = columnNames[s1];
+                    }
+                    else 
+                    {
+                        printHeaderMissingError(fileName,  s1);
+                        exit(1);
+                    }
+                }
+
+                for (int i = 0; i < nints; i++) 
+                {
+                    for (int j = i+1; j < nints; j++) 
+                    {
+                        int idx;
+                        std::string s2 = "Cov_Beta_" + ord_betaIntNames[i] + "_" + ord_betaIntNames[j];
+                        std::string s3 = "Cov_Beta_" + ord_betaIntNames[j] + "_" + ord_betaIntNames[i];
+                        if (columnNames.find(s2) != columnNames.end()) 
+                        {
+                            idx = columnNames[s2];
+                        } 
+                        else if (columnNames.find(s3) != columnNames.end())
+                        {
+                            idx = columnNames[s3];
+                        }
+                        else 
+                        {
+                            cerr << "\nERROR: The file [" <<  fileName << "] does not contain the column " << s2 << " or " << s3 << ".\n\n";
+                            exit(1);
+                        }
+                        mb_covIntColumn[(i * nints) + j] = idx;
+                        mb_covIntColumn[(j * nints) + i] = idx;
+                    }
+                }
+                fip->mb_covIntColumn[fileName] = mb_covIntColumn;
+            }
+
+
+            // Get columns containing the robust summary statistics for the interaction terms	
+            if (rb)
+            {
+                std::vector<int> rb_covIntColumn(nints * nints);
+                for (int i = 0; i < nints; i++) 
+                {
+                    std::string s1 = "robust_SE_Beta_" + ord_betaIntNames[i];
+                    if (columnNames.find(s1) != columnNames.end()) 
+                    {
+                        rb_covIntColumn[i*nints + i] = columnNames[s1];
+                    }
+                    else 
+                    {
+                        printHeaderMissingError(fileName,  s1);
+                        exit(1);
+                    }
+                }
+
+                for (int i = 0; i < nints; i++) 
+                {
+                    for (int j = i+1; j < nints; j++) 
+                    {
+                        int idx;
+                        std::string s2 = "robust_Cov_Beta_" + ord_betaIntNames[i] + "_" + ord_betaIntNames[j];
+                        std::string s3 = "robust_Cov_Beta_" + ord_betaIntNames[j] + "_" + ord_betaIntNames[i];
+
+                        if (columnNames.find(s2) != columnNames.end()) 
+                        {
+                            idx = columnNames[s2];
+                        } 
+                        else if (columnNames.find(s3) != columnNames.end())
+                        {
+                            idx = columnNames[s3];
+                        }
+                        else 
+                        {
+                            cerr << "\nERROR: The file [" <<  fileName << "] does not contain the column " << s2 << " or " << s3 << ".\n\n";
+                            exit(1);
+                        }
+                        rb_covIntColumn[(i * nints) + j] = idx;
+                        rb_covIntColumn[(j * nints) + i] = idx;
+                    }
+                }
+                fip->rb_covIntColumn[fileName] = rb_covIntColumn;
+            }
+        }
     }
 }
 
