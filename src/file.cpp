@@ -437,7 +437,7 @@ void processFileHeader(int nInt1, int nInt2, bool mb, bool rb, bool additionalTe
 
 
 
-void printOutputHeader(bool mb, bool rb, std::string output, size_t nInt1, std::vector<std::string> intNames) 
+void printOutputHeader(bool mb, bool rb, bool additionalTest, std::string output, std::string output2, size_t nInt1, size_t nInt2, std::vector<std::string> intNames, std::vector<std::string> intNames2) 
 {
     for(std::string &s : intNames){
         s = "G-" + s;
@@ -509,6 +509,80 @@ void printOutputHeader(bool mb, bool rb, std::string output, size_t nInt1, std::
     }
     
     results.close();
+
+    if(additionalTest){
+        for(std::string &s : intNames2){
+            if (s != "G") {
+                s = "G-" + s;
+              }
+        }
+
+
+        std::ofstream results2(output2, std::ofstream::binary);
+
+        results2 << "SNPID\t" << "CHR\t" << "POS\t" << "Non_Effect_Allele\t" << "Effect_Allele\t" << "N_files\t" << "N_Samples\t" << "AF\t";
+    
+        if (mb)
+        {
+            results2 << "Beta_Marginal\t" << "SE_Beta_Marginal\t";
+       
+            // Print Int beta header
+            for (size_t i = 0; i < nInt2; i++) 
+            {
+                results2 << "Beta_" << intNames2[i] << "\t";
+            }
+
+            // Print model-based covariance
+            for (size_t i = 0; i < nInt2; i++) 
+            {
+                results2 << "SE_Beta_" << intNames2[i] << "\t"; 
+            }
+            for (size_t i = 0; i < nInt2; i++) 
+            {
+                for (size_t j = 0; j < nInt2; j++) 
+                {
+                    if (i < j) 
+                    {
+                        results2 << "Cov_Beta_" << intNames2[i] << "_" << intNames2[j] << "\t"; 
+                    }
+                }
+            }
+
+            // Print p-values
+            results2 << "P_Value_Marginal\t" << "P_Value_Interaction\t" << "P_Value_Joint" << ((rb) ? "\t" : "\n");
+        }
+
+        if (rb)
+        {
+            results2 << "robust_Beta_Marginal\t" << "robust_SE_Beta_Marginal\t";
+
+            // Print beta header
+            for (size_t i = 0; i < nInt2; i++) 
+            {
+                results2 << "robust_Beta_" << intNames2[i] << "\t";
+            }
+
+            // Print model-based covariance
+            for (size_t i = 0; i < nInt2; i++) 
+            {
+                results2 << "robust_SE_Beta_" << intNames2[i] << "\t"; 
+            }
+            for (size_t i = 0; i < nInt2; i++) 
+            {
+                for (size_t j = 0; j < nInt2; j++) 
+                {
+                    if (i < j) 
+                    {
+                        results2 << "robust_Cov_Beta_" << intNames2[i] << "_" << intNames2[j] << "\t"; 
+                    }
+                }
+            }
+
+            results2 << "robust_P_Value_Marginal\t" << "robust_P_Value_Interaction\t" << "robust_P_Value_Joint\n";
+        }
+    
+        results2.close();
+    }
 }
 
 
