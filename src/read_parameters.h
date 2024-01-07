@@ -20,6 +20,7 @@ public:
     std::vector<std::string> additionalTest;
 
     size_t nInt;
+    size_t nInt2;
     size_t nCov;
     int metaOpt;
 
