@@ -341,7 +341,7 @@ void metagem(CommandLine cmd)
     printDone(2);
 
     // Create the output file and write column header names
-    printOutputHeader(mb, rb, cmd.outFile, nInt1, cmd.intNames);
+    printOutputHeader(mb, rb, additionalTest, cmd.outFile, cmd.outFile2, nInt1, nInt2, cmd.intNames, cmd.intNames2);
     std::ofstream results(cmd.outFile, std::ios_base::app);
     std::ostringstream oss;
 
