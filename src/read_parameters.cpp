@@ -21,7 +21,7 @@ void CommandLine::processCommandLine(int argc, char* argv[]) {
     app.add_option("--exposure-names", intNames, "")->expected(1, 1000000)->required();
     app.add_option("--out", outFile_in, "")->expected(1);
     app.add_option("--meta-option", metaOpt_in, "");
-    app.add_option("--additional-test", additionalTest, "Specify one additional test to run") -> expected(1, 100);
+    app.add_option("--additional-test", additionalTestInfo, "Specify one additional test to run") -> expected(1, 100);
   
     try
     {
@@ -157,8 +157,9 @@ void CommandLine::processCommandLine(int argc, char* argv[]) {
         }
 
         // Additional test
-        if (!additionalTest.empty()) {
-          intNames2.assign(additionalTest.begin(), additionalTest.end() - 1);
+        if (!additionalTestInfo.empty()) {
+          additionalTest = true;
+          intNames2.assign(additionalTestInfo.begin(), additionalTestInfo.end() - 1);
           outfile2 = additionalTest.back();
           std::set<std::string> s(intNames.begin(), intNames.end());
           if (s.size() != intNames2.size()) {
