@@ -46,17 +46,20 @@ void metagem(CommandLine cmd)
     // Read the header of each file
     printProcessingFiles();
     FileInfo* fip = new FileInfo();
-    processFileHeader(cmd.nInt + 1, cmd.nInt2, cmd.mb, cmd.rb, cmd.lcIntNames, cmd.lcIntNames2, cmd.fileNames, fip);
+    processFileHeader(cmd.nInt + 1, cmd.nInt2, cmd.mb, cmd.rb, cmd.additionalTest, cmd.lcIntNames, cmd.lcIntNames2, cmd.fileNames, fip);
 
     // Initialize objects
     int nvars = 0;
     bool mb = cmd.mb;
     bool rb = cmd.rb;
+    bool additionalTest = cmd.additionalTest;
     size_t nInt   = cmd.nInt;
+    size_t nInt2   = cmd.nInt2;
     size_t nInt1  = nInt + 1; // plus G
     size_t nFiles = cmd.fileNames.size();
 
     int nInt1_sq = nInt1 * nInt1;
+    int nInt2_sq = nInt2 * nInt2;
     std::vector<std::string> snpid;
     std::vector<std::string> effectAllele;
     std::vector<std::string> nonEffectAllele;
