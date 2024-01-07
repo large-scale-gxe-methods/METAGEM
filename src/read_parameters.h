@@ -11,8 +11,11 @@ public:
     std::vector<std::string> fileNames;
     std::vector<std::string> intNames;
     std::vector<std::string> lcIntNames;
+    std::vector<std::string> intNames2;
+    std::vector<std::string> lcIntNames2;
 
     std::string outFile;
+    std::string outfile2
     std::string metaFileList;
     std::vector<std::string> additionalTest;
 
