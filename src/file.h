@@ -29,7 +29,9 @@ class FileInfo {
         std::unordered_map<std::string, std::vector<int>> betaIntColumn;
         std::unordered_map<std::string, std::vector<int>> betaIntColumn2;
         std::unordered_map<std::string, std::vector<int>> mb_covIntColumn;
+        std::unordered_map<std::string, std::vector<int>> mb_covIntColumn2;
         std::unordered_map<std::string, std::vector<int>> rb_covIntColumn;      
+        std::unordered_map<std::string, std::vector<int>> rb_covIntColumn2; 
 };
 
 void processFileHeader(int nInt1, int nInt2, bool mb, bool rb, bool additionalTest, std::vector<std::string> lc_intNames, std::vector<std::string> lc_intNames2, std::vector<std::string> fileNames, FileInfo* fip);
