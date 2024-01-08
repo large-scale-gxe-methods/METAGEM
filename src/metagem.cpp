@@ -75,6 +75,10 @@ void metagem(CommandLine cmd)
     std::vector<double> rb_MV;
     std::vector<double> rb_U;
     std::vector<double> rb_V;
+    std::vector<double> mb_U2;
+    std::vector<double> mb_V2;
+    std::vector<double> rb_U2;
+    std::vector<double> rb_V2;
     sparse_hash_map<std::pair<std::string, std::string>, int> snpid_idx;
     
     for (size_t f = 0; f < nFiles; f++)
@@ -91,6 +95,7 @@ void metagem(CommandLine cmd)
         int betaMargColumn   = fip->betaMargColumn[fileName];	
         int nheader          = fip->nheader[fileName];
         std::vector<int> betaIntColumn = fip->betaIntColumn[fileName];
+        std::vector<int> betaIntColumn2 = fip->betaIntColumn[fileName];
 
         // Read input file
         std::ifstream file;
@@ -221,6 +226,57 @@ void metagem(CommandLine cmd)
                     subMatsubVecprod(&rb_V[0], &fileBetaInt[0], &rb_U[0], nInt1, nInt1, vi, 0, ui);
                 }
 
+                if(additionalTest){
+                    // Matrix indices
+                    int ui = nvars * nInt2;
+                    int vi = nvars * nInt2_sq;
+    
+                    // Betas
+                    std::vector<double> fileBetaInt2(nInt2);
+                    for (size_t i = 0; i < nInt2; i++) {
+                        fileBetaInt2[i] = std::stod(values[betaIntColumn2[i]]);
+                    }
+    
+                    // Model-based
+                    if (mb)
+                    {
+                        // Interaction
+                        mb_U2.resize(mb_U2.size() + nInt2);
+                        std::vector<int> mb_covIntColumn2 = fip->mb_covIntColumn2[fileName];
+                        for (size_t i = 0; i < nInt2; i++) {
+                            size_t isq = (i * nInt2);
+                            size_t ii  = vi + isq;
+                            for (size_t j = 0; j < nInt2; j++) {
+                                mb_V2.push_back(std::stod(values[mb_covIntColumn2[isq + j]]));
+                            }
+                            mb_V2[ii + i] *= mb_V2[ii + i];
+                        }
+    
+                        // Add to main matrix
+                        subMatInv(&mb_V2[0], nInt2, vi);
+                        subMatsubVecprod(&mb_V2[0], &fileBetaInt2[0], &mb_U2[0], nInt2, nInt2, vi, 0, ui);
+                    }
+    
+                    // Robust
+                    if (rb)
+                    {
+                        // Interaction
+                        rb_U2.resize(rb_U2.size() + nInt2);
+                        std::vector<int> rb_covIntColumn2 = fip->rb_covIntColumn2[fileName];
+                        for (size_t i = 0; i < nInt2; i++) {
+                            size_t isq = (i * nInt2);
+                            size_t ii  = vi + isq;
+                            for (size_t j = 0; j < nInt2; j++) {
+                                rb_V2.push_back(std::stod(values[rb_covIntColumn2[isq + j]]));
+                            }
+                            rb_V2[ii + i] *= rb_V2[ii + i];
+                        }
+    
+                        // Add to main matrix
+                        subMatInv(&rb_V2[0], nInt2, vi);
+                        subMatsubVecprod(&rb_V2[0], &fileBetaInt2[0], &rb_U2[0], nInt2, nInt2, vi, 0, ui);
+                    }
+                }
                 nvars++;
             } else {
                 
@@ -326,6 +382,74 @@ void metagem(CommandLine cmd)
                         rb_U[ui + i] += rb_fileU[i];
                         for (size_t j = 0; j < nInt1; j++) {
                             rb_V[vi + ii + j] += rb_fileV[ii + j];
+                        }
+                    }
+                }
+
+                if(additionalTest){
+                    // Matrix index
+                    int ui = index * nInt2;
+                    int vi = index * (nInt2 * nInt2);
+    
+                    // Betas
+                    std::vector<double> fileBetaInt2(nInt2);
+                    for (size_t i = 0; i < nInt2; i++) {
+                        fileBetaInt2[i] = std::stod(values[betaIntColumn2[i]]) * dir;
+                    }
+    
+                    // Model-based
+                    if (mb)
+                    {
+                        // Interactions
+                        std::vector<double> mb_fileU2(nInt2);
+                        std::vector<double> mb_fileV2(nInt2 * nInt2);
+                        std::vector<int> mb_covIntColumn2 = fip->mb_covIntColumn2[fileName];
+    
+                        for (size_t i = 0; i < nInt2; i++) {
+                            size_t ii = i * nInt2;
+                            for (size_t j = 0; j < nInt2; j++) {
+                                mb_fileV2[ii + j] = std::stod(values[mb_covIntColumn2[ii + j]]);
+                            }
+                            mb_fileV2[ii + i] *= mb_fileV2[ii + i];
+                        }
+    
+                        // Add to main matrix
+                        matInv(&mb_fileV2[0], nInt2);
+                        matvecprod(&mb_fileV2[0], &fileBetaInt2[0], &mb_fileU2[0], nInt2, nInt2);
+                        for (size_t i = 0; i < nInt2; i++){
+                            size_t ii = i * nInt2;
+                            mb_U2[ui + i] += mb_fileU2[i];
+                            for (size_t j = 0; j < nInt2; j++) {
+                                mb_V2[vi + ii + j] += mb_fileV2[ii + j];
+                            }
+                        }
+                    }
+    
+                    // Robust
+                    if (rb)
+                    {
+                        // Interactions
+                        std::vector<double> rb_fileU2(nInt2);
+                        std::vector<double> rb_fileV2(nInt2 * nInt2);
+                        std::vector<int> rb_covIntColumn2 = fip->rb_covIntColumn2[fileName];
+                        
+                        for (size_t i = 0; i < nInt2; i++) {
+                            size_t ii = i * nInt2;
+                            for (size_t j = 0; j < nInt2; j++) {
+                                rb_fileV2[ii + j] = std::stod(values[rb_covIntColumn2[ii + j]]);
+                            }
+                            rb_fileV2[ii + i] *= rb_fileV2[ii + i];
+                        }
+    
+                        // Add to main matrix
+                        matInv(&rb_fileV2[0], nInt2);
+                        matvecprod(&rb_fileV2[0], &fileBetaInt2[0], &rb_fileU2[0], nInt2, nInt2);
+                        for (size_t i = 0; i < nInt2; i++) {
+                            size_t ii = i * nInt2;
+                            rb_U2[ui + i] += rb_fileU2[i];
+                            for (size_t j = 0; j < nInt2; j++) {
+                                rb_V2[vi + ii + j] += rb_fileV2[ii + j];
+                            }
                         }
                     }
                 }
