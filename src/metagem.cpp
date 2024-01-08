@@ -470,6 +470,7 @@ void metagem(CommandLine cmd)
     // Create the output file and write column header names
     printOutputHeader(mb, rb, additionalTest, cmd.outFile, cmd.outFile2, nInt1, nInt2, cmd.intNames, cmd.intNames2);
     std::ofstream results(cmd.outFile, std::ios_base::app);
+    std::ofstream results2(cmd.outFile2, std::ios_base::app);
     std::ostringstream oss;
 
 
@@ -486,12 +487,22 @@ void metagem(CommandLine cmd)
     double pvalJoint;
     double* Ai = new double[nInt1 * nInt1];
     double* VE = new double[nInt * nInt];
+    double* Ai2 = new double[nInt2 * nInt2];
     std::vector<double> StempE(nInt, 0.0);
     std::vector<double> StempGE(nInt1, 0.0);
     std::vector<double> betaInt(nInt1, 0.0);
+    std::vector<double> StempGE2(nInt2, 0.0);
+    std::vector<double> betaInt2(nInt2, 0.0);
     boost::math::chi_squared chisq_dist_M(1);
+    std::vector<std::string> intNames2 = cmd.intNames2
     boost::math::chi_squared chisq_dist_Int(nInt);
     boost::math::chi_squared chisq_dist_Joint(nInt1);
+    boost::math::chi_squared chisq_dist_Joint2(nInt2);
+    if (!intNames2.empty() && intNames2[0] == "G") {
+        double* VE2 = new double[(nInt2-1) * (nInt2-1)];
+        std::vector<double> StempE2(nInt2-1, 0.0);
+        boost::math::chi_squared chisq_dist_Int2(nInt2-1);
+    }
 
     printMetaBegin(nFiles, nvars);
     for (int i = 0; i < nvars; i++)
@@ -658,8 +669,159 @@ void metagem(CommandLine cmd)
     delete[] Ai;
     delete[] VE;
 
+    if(additionalTest){
+            int is  = (i * nInt2);
+            int iss = (i * nInt2 * nInt2);
+    
+            if (mb)
+            {
+                subMatrix(&mb_V2[0], Ai2, nInt2, nInt2, nInt2, nInt2, iss);
+                subMatInv(&mb_V2[0], nInt2, iss);
+    
+    
+                // Interaction effects
+                for (size_t j = 0; j < nInt2; j++) {
+                    for (size_t k = 0; k < nInt2; k++) {
+                        betaInt2[j] += (mb_V2[iss + (nInt2 * j) + k] * mb_U2[is + k]);
+                    }
+                }
+    
+                 
+    
+                // Joint P-value
+                for (size_t j = 0; j < nInt2; j++) {
+                    for (size_t k = 0; k < nInt2; k++) {
+                        StempGE2[j] += (Ai2[(nInt2 * j) + k] * betaInt2[k]);
+                    }
+                }
+
+                statJoint = 0.0;
+                for (size_t k = 0; k < nInt2; k++)
+                    statJoint += betaInt[k] * StempGE2[k];
+                pvalJoint = (std::isnan(statJoint) || statJoint <= 0.0) ? NAN : boost::math::cdf(complement(chisq_dist_Joint2, statJoint));
+                
+                if (!intNames2.empty() && intNames2[0] == "G") {
+                    // Int P-value
+                    subMatrix(&mb_V2[0], VE2, nInt2-1, nInt2-1, nInt2, nInt2-1, iss + nInt2 + 1);
+                    matInv(VE2, nInt2-1);
+                    for (size_t j = 0; j < (nInt2-1); j++) {
+                        for (size_t k = 0; k < (nInt2-1); k++) {
+                            StempE2[j] += (VE2[((nInt2-1) * j) + k] * betaInt2[k + 1]);
+                        }
+                    }
+
+                    statInt = 0.0;
+                    for (size_t j = 1; j < nInt2; j++) 
+                        statInt += betaInt2[j] * StempE2[j-1];
+                    pvalInt = (std::isnan(statInt) || statInt <= 0.0) ? NAN : boost::math::cdf(complement(chisq_dist_Int2, statInt));
+                    std::fill(StempE2.begin(), StempE2.end(), 0.0);
+                }else{
+                    pvalInt = pvalJoint
+                }
+  
+                
+                // Print
+                oss << betaMarg << "\t" << sqrt(varMarg) << "\t";
+                for (size_t j = 0; j < nInt2; j++) {
+                    oss << betaInt2[j] << "\t";
+                }
+                for (size_t ii = 0; ii < nInt2; ii++) {
+                    oss << sqrt(mb_V2[iss + (ii * nInt2) + ii]) << "\t";
+                }
+                for (size_t ii = 0; ii < nInt2; ii++) {
+                    for (size_t jj = 0; jj < nInt2; jj++) {
+                        if (ii < jj) {
+                            oss << mb_V2[iss + (ii * nInt2) + jj] << "\t";
+                        }
+                    }
+                }
+                oss << pvalMarg << "\t" << pvalInt << "\t" << pvalJoint << ((rb) ? "\t" : "\n");
+    
+                std::fill(StempGE2.begin(), StempGE2.end(), 0.0);
+                std::fill(betaInt2.begin(), betaInt2.end(), 0.0);
+            }
+    
+            if (rb)
+            {
+                subMatrix(&rb_V[0], Ai2, nInt2, nInt2, nInt2, nInt2, iss);
+                subMatInv(&rb_V[0], nInt2, iss);
+                subMatrix(&rb_V[0], VE2, nInt2-1, nInt2-1, nInt2, nInt2-1, iss + nInt2 + 1);
+    
+    
+                // Interaction effects
+                for (size_t j = 0; j < nInt2; j++) {
+                    for (size_t k = 0; k < nInt2; k++) {
+                        betaInt2[j] += (rb_V2[iss + (nInt2 * j) + k] * rb_U2[is + k]);
+                    }
+                }
+    
+    
+                // Joint P-value
+                for (size_t j = 0; j < nInt2; j++) {
+                    for (size_t k = 0; k < nInt2; k++) {
+                        StempGE2[j] += (Ai2[(nInt2 * j) + k] * betaInt2[k]);
+                    }
+                }
+    
+                statJoint = 0.0;
+                for (size_t k = 0; k < nInt2; k++)
+                    statJoint += betaInt2[k] * StempGE2[k];
+                pvalJoint = (std::isnan(statJoint) || statJoint <= 0.0) ? NAN : boost::math::cdf(complement(chisq_dist_Joint2, statJoint));
+    
+                if (!intNames2.empty() && intNames2[0] == "G") {
+                    // Int P-value
+                    matInv(VE2, nInt2-1);
+                    for (size_t j = 0; j < (nInt2-1); j++) {
+                            for (size_t k = 0; k < (nInt2-1); k++) {
+                                StempE2[j] += (VE2[((nInt2-1) * j) + k] * betaInt2[k + 1]);
+                            }
+                    }
+        
+                    statInt = 0.0;
+                    for (size_t j = 1; j < nInt2; j++) 
+                        statInt += betaInt2[j] * StempE2[j-1];
+                    pvalInt = (std::isnan(statInt) || statInt <= 0.0) ? NAN : boost::math::cdf(complement(chisq_dist_Int2, statInt));
+                    std::fill(StempE2.begin(), StempE2.end(), 0.0);
+                }else{
+                    pvalInt = pvalJoint
+                }
+                
+                // Print
+                oss << betaMarg << "\t" << sqrt(varMarg) << "\t";
+                for (size_t j = 0; j < nInt2; j++) {
+                    oss << betaInt2[j] << "\t";
+                }
+                for (size_t ii = 0; ii < nInt2; ii++) {
+                    oss << sqrt(rb_V2[iss + (ii * nInt2) + ii]) << "\t";
+                }
+                for (size_t ii = 0; ii < nInt2; ii++) {
+                    for (size_t jj = 0; jj < nInt2; jj++) {
+                        if (ii < jj) {
+                            oss << rb_V2[iss + (ii * nInt2) + jj] << "\t";
+                        }
+                    }
+                }
+                oss << pvalMarg << "\t" << pvalInt << "\t" << pvalJoint << "\n";
+    
+                std::fill(StempGE2.begin(), StempGE2.end(), 0.0);
+                std::fill(betaInt2.begin(), betaInt2.end(), 0.0);
+            }
+    
+            if (i % 100000 == 0)
+            {
+                results2 << oss.str();
+                oss.str(std::string());
+                oss.clear();
+            }
+        }
+    
+        results2 << oss.str();
+        oss.str(std::string());
+        oss.clear();
+        results2.close();
+    }
     printDone(2);
-    printOutputLocation(cmd.outFile);
+    printOutputLocation(cmd.outFile2);
 }
 
 void printWelcome() {
