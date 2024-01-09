@@ -495,7 +495,7 @@ void metagem(CommandLine cmd)
     std::vector<double> StempGE2(nInt2, 0.0);
     std::vector<double> betaInt2(nInt2, 0.0);
     boost::math::chi_squared chisq_dist_M(1);
-    std::vector<std::string> intNames2 = cmd.intNames2
+    std::vector<std::string> intNames2 = cmd.intNames2;
     boost::math::chi_squared chisq_dist_Int(nInt);
     boost::math::chi_squared chisq_dist_Joint(nInt1);
     boost::math::chi_squared chisq_dist_Joint2(nInt2);
