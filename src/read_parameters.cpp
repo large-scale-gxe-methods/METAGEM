@@ -160,7 +160,7 @@ void CommandLine::processCommandLine(int argc, char* argv[]) {
         if (!additionalTestInfo.empty()) {
           additionalTest = true;
           intNames2.assign(additionalTestInfo.begin(), additionalTestInfo.end() - 1);
-          outfile2 = additionalTest.back();
+          outfile2 = additionalTestInfo.back();
           std::set<std::string> s(intNames2.begin(), intNames2.end());
           if (s.size() != intNames2.size()) {
               cerr << "\nERROR: There are duplicate variable names in the additional test.\n\n";
