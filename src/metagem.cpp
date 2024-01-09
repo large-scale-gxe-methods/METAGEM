@@ -489,21 +489,19 @@ void metagem(CommandLine cmd)
     double* Ai = new double[nInt1 * nInt1];
     double* VE = new double[nInt * nInt];
     double* Ai2 = new double[nInt2 * nInt2];
+    double* VE2 = nullptr;
     std::vector<double> StempE(nInt, 0.0);
     std::vector<double> StempGE(nInt1, 0.0);
     std::vector<double> betaInt(nInt1, 0.0);
+    std::vector<double> StempE2;
     std::vector<double> StempGE2(nInt2, 0.0);
     std::vector<double> betaInt2(nInt2, 0.0);
     boost::math::chi_squared chisq_dist_M(1);
     std::vector<std::string> intNames2 = cmd.intNames2;
     boost::math::chi_squared chisq_dist_Int(nInt);
     boost::math::chi_squared chisq_dist_Joint(nInt1);
+    boost::math::chi_squared chisq_dist_Int2(nInt2);
     boost::math::chi_squared chisq_dist_Joint2(nInt2);
-    if (!intNames2.empty() && intNames2[0] == "G") {
-        double* VE2 = new double[(nInt2-1) * (nInt2-1)];
-        std::vector<double> StempE2(nInt2-1, 0.0);
-        boost::math::chi_squared chisq_dist_Int2(nInt2-1);
-    }
 
     printMetaBegin(nFiles, nvars);
     for (int i = 0; i < nvars; i++)
@@ -695,6 +693,9 @@ void metagem(CommandLine cmd)
                 
                 if (!intNames2.empty() && intNames2[0] == "G") {
                     // Int P-value
+                    double* VE2 = new double[(nInt2-1) * (nInt2-1)];
+                    std::vector<double> StempE2(nInt2-1, 0.0);
+                    chisq_dist_Int2 = boost::math::chi_squared(nInt2-1);
                     subMatrix(&mb_V2[0], VE2, nInt2-1, nInt2-1, nInt2, nInt2-1, iss + nInt2 + 1);
                     matInv(VE2, nInt2-1);
                     for (size_t j = 0; j < (nInt2-1); j++) {
@@ -763,6 +764,9 @@ void metagem(CommandLine cmd)
     
                 if (!intNames2.empty() && intNames2[0] == "G") {
                     // Int P-value
+                    double* VE2 = new double[(nInt2-1) * (nInt2-1)];
+                    std::vector<double> StempE2(nInt2-1, 0.0);
+                    chisq_dist_Int2 = boost::math::chi_squared(nInt2-1);
                     matInv(VE2, nInt2-1);
                     for (size_t j = 0; j < (nInt2-1); j++) {
                             for (size_t k = 0; k < (nInt2-1); k++) {
@@ -823,11 +827,11 @@ void metagem(CommandLine cmd)
     delete[] VE;
 
     delete[] Ai2;
+    delete[] VE2;
     
     printDone(2);
     printOutputLocation(cmd.outFile);
     if(additionalTest){
-        delete[] VE2;
         printOutputLocation(cmd.outFile2);
     }
 }
