@@ -780,7 +780,7 @@ void metagem(CommandLine cmd)
                 }
                 
                 // Print
-                oss << betaMarg << "\t" << sqrt(varMarg) << "\t";
+                oss2 << betaMarg << "\t" << sqrt(varMarg) << "\t";
                 for (size_t j = 0; j < nInt2; j++) {
                     oss2 << betaInt2[j] << "\t";
                 }
