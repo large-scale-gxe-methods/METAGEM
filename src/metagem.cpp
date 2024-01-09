@@ -694,7 +694,7 @@ void metagem(CommandLine cmd)
                 if (!intNames2.empty() && intNames2[0] == "G") {
                     // Int P-value
                     double* VE2 = new double[(nInt2-1) * (nInt2-1)];
-                    std::vector<double> StempE2(nInt2-1, 0.0);
+                    StempE2.resize(nInt2-1, 0.0);
                     chisq_dist_Int2 = boost::math::chi_squared(nInt2-1);
                     subMatrix(&mb_V2[0], VE2, nInt2-1, nInt2-1, nInt2, nInt2-1, iss + nInt2 + 1);
                     matInv(VE2, nInt2-1);
@@ -765,7 +765,7 @@ void metagem(CommandLine cmd)
                 if (!intNames2.empty() && intNames2[0] == "G") {
                     // Int P-value
                     double* VE2 = new double[(nInt2-1) * (nInt2-1)];
-                    std::vector<double> StempE2(nInt2-1, 0.0);
+                    StempE2.resize(nInt2-1, 0.0);
                     chisq_dist_Int2 = boost::math::chi_squared(nInt2-1);
                     matInv(VE2, nInt2-1);
                     for (size_t j = 0; j < (nInt2-1); j++) {
