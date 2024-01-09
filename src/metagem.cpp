@@ -690,7 +690,7 @@ void metagem(CommandLine cmd)
 
                 statJoint = 0.0;
                 for (size_t k = 0; k < nInt2; k++)
-                    statJoint += betaInt[k] * StempGE2[k];
+                    statJoint += betaInt2[k] * StempGE2[k];
                 pvalJoint = (std::isnan(statJoint) || statJoint <= 0.0) ? NAN : boost::math::cdf(complement(chisq_dist_Joint2, statJoint));
                 
                 if (!intNames2.empty() && intNames2[0] == "G") {
