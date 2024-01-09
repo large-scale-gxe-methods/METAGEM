@@ -710,7 +710,7 @@ void metagem(CommandLine cmd)
                     pvalInt = (std::isnan(statInt) || statInt <= 0.0) ? NAN : boost::math::cdf(complement(chisq_dist_Int2, statInt));
                     std::fill(StempE2.begin(), StempE2.end(), 0.0);
                 }else{
-                    pvalInt = pvalJoint
+                    pvalInt = pvalJoint;
                 }
   
                 
@@ -780,7 +780,7 @@ void metagem(CommandLine cmd)
                     pvalInt = (std::isnan(statInt) || statInt <= 0.0) ? NAN : boost::math::cdf(complement(chisq_dist_Int2, statInt));
                     std::fill(StempE2.begin(), StempE2.end(), 0.0);
                 }else{
-                    pvalInt = pvalJoint
+                    pvalInt = pvalJoint;
                 }
                 
                 // Print
