@@ -512,6 +512,7 @@ void metagem(CommandLine cmd)
         int iss = (i * nInt1 * nInt1);
 
         oss << snpid[i] << nSeen[i] << "\t" << nSamples[i] << "\t" << AF[i] / 2.0 / nSamples[i] << "\t";
+        oss2 << snpid[i] << nSeen[i] << "\t" << nSamples[i] << "\t" << AF[i] / 2.0 / nSamples[i] << "\t";
         if (mb)
         {
             subMatrix(&mb_V[0], Ai, nInt1, nInt1, nInt1, nInt1, iss);
@@ -781,19 +782,19 @@ void metagem(CommandLine cmd)
                 // Print
                 oss << betaMarg << "\t" << sqrt(varMarg) << "\t";
                 for (size_t j = 0; j < nInt2; j++) {
-                    oss << betaInt2[j] << "\t";
+                    oss2 << betaInt2[j] << "\t";
                 }
                 for (size_t ii = 0; ii < nInt2; ii++) {
-                    oss << sqrt(rb_V2[iss + (ii * nInt2) + ii]) << "\t";
+                    oss2 << sqrt(rb_V2[iss + (ii * nInt2) + ii]) << "\t";
                 }
                 for (size_t ii = 0; ii < nInt2; ii++) {
                     for (size_t jj = 0; jj < nInt2; jj++) {
                         if (ii < jj) {
-                            oss << rb_V2[iss + (ii * nInt2) + jj] << "\t";
+                            oss2 << rb_V2[iss + (ii * nInt2) + jj] << "\t";
                         }
                     }
                 }
-                oss << pvalMarg << "\t" << pvalInt << "\t" << pvalJoint << "\n";
+                oss2 << pvalMarg << "\t" << pvalInt << "\t" << pvalJoint << "\n";
     
                 std::fill(StempGE2.begin(), StempGE2.end(), 0.0);
                 std::fill(betaInt2.begin(), betaInt2.end(), 0.0);
