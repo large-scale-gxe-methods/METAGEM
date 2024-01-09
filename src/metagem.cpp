@@ -739,7 +739,6 @@ void metagem(CommandLine cmd)
             {
                 subMatrix(&rb_V[0], Ai2, nInt2, nInt2, nInt2, nInt2, iss);
                 subMatInv(&rb_V[0], nInt2, iss);
-                subMatrix(&rb_V[0], VE2, nInt2-1, nInt2-1, nInt2, nInt2-1, iss + nInt2 + 1);
     
     
                 // Interaction effects
@@ -767,6 +766,7 @@ void metagem(CommandLine cmd)
                     double* VE2 = new double[(nInt2-1) * (nInt2-1)];
                     StempE2.resize(nInt2-1, 0.0);
                     chisq_dist_Int2 = boost::math::chi_squared(nInt2-1);
+                    subMatrix(&rb_V[0], VE2, nInt2-1, nInt2-1, nInt2, nInt2-1, iss + nInt2 + 1);
                     matInv(VE2, nInt2-1);
                     for (size_t j = 0; j < (nInt2-1); j++) {
                             for (size_t k = 0; k < (nInt2-1); k++) {
