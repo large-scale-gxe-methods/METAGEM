@@ -95,7 +95,7 @@ void metagem(CommandLine cmd)
         int betaMargColumn   = fip->betaMargColumn[fileName];	
         int nheader          = fip->nheader[fileName];
         std::vector<int> betaIntColumn = fip->betaIntColumn[fileName];
-        std::vector<int> betaIntColumn2 = fip->betaIntColumn[fileName];
+        std::vector<int> betaIntColumn2 = fip->betaIntColumn2[fileName];
 
         // Read input file
         std::ifstream file;
@@ -472,6 +472,7 @@ void metagem(CommandLine cmd)
     std::ofstream results(cmd.outFile, std::ios_base::app);
     std::ofstream results2(cmd.outFile2, std::ios_base::app);
     std::ostringstream oss;
+    std::ostringstream oss2;
 
 
 
@@ -659,17 +660,8 @@ void metagem(CommandLine cmd)
             oss.str(std::string());
             oss.clear();
         }
-    }
 
-    results << oss.str();
-    oss.str(std::string());
-    oss.clear();
-    results.close();
-
-    delete[] Ai;
-    delete[] VE;
-
-    if(additionalTest){
+        if(additionalTest){
             int is  = (i * nInt2);
             int iss = (i * nInt2 * nInt2);
     
@@ -721,21 +713,21 @@ void metagem(CommandLine cmd)
   
                 
                 // Print
-                oss << betaMarg << "\t" << sqrt(varMarg) << "\t";
+                oss2 << betaMarg << "\t" << sqrt(varMarg) << "\t";
                 for (size_t j = 0; j < nInt2; j++) {
-                    oss << betaInt2[j] << "\t";
+                    oss2 << betaInt2[j] << "\t";
                 }
                 for (size_t ii = 0; ii < nInt2; ii++) {
-                    oss << sqrt(mb_V2[iss + (ii * nInt2) + ii]) << "\t";
+                    oss2 << sqrt(mb_V2[iss + (ii * nInt2) + ii]) << "\t";
                 }
                 for (size_t ii = 0; ii < nInt2; ii++) {
                     for (size_t jj = 0; jj < nInt2; jj++) {
                         if (ii < jj) {
-                            oss << mb_V2[iss + (ii * nInt2) + jj] << "\t";
+                            oss2 << mb_V2[iss + (ii * nInt2) + jj] << "\t";
                         }
                     }
                 }
-                oss << pvalMarg << "\t" << pvalInt << "\t" << pvalJoint << ((rb) ? "\t" : "\n");
+                oss2 << pvalMarg << "\t" << pvalInt << "\t" << pvalJoint << ((rb) ? "\t" : "\n");
     
                 std::fill(StempGE2.begin(), StempGE2.end(), 0.0);
                 std::fill(betaInt2.begin(), betaInt2.end(), 0.0);
@@ -809,19 +801,34 @@ void metagem(CommandLine cmd)
     
             if (i % 100000 == 0)
             {
-                results2 << oss.str();
-                oss.str(std::string());
-                oss.clear();
+                results2 << oss2.str();
+                oss2.str(std::string());
+                oss2.clear();
             }
-        }
-    
-        results2 << oss.str();
-        oss.str(std::string());
-        oss.clear();
-        results2.close();
+        } 
     }
+
+    results << oss.str();
+    oss.str(std::string());
+    oss.clear();
+    results.close();
+
+    results2 << oss2.str();
+    oss2.str(std::string());
+    oss2.clear();
+    results2.close();
+
+    delete[] Ai;
+    delete[] VE;
+
+    delete[] Ai2;
+    
     printDone(2);
-    printOutputLocation(cmd.outFile2);
+    printOutputLocation(cmd.outFile);
+    if(additionalTest){
+        delete[] VE2;
+        printOutputLocation(cmd.outFile2);
+    }
 }
 
 void printWelcome() {
