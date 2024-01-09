@@ -737,8 +737,8 @@ void metagem(CommandLine cmd)
     
             if (rb)
             {
-                subMatrix(&rb_V[0], Ai2, nInt2, nInt2, nInt2, nInt2, iss);
-                subMatInv(&rb_V[0], nInt2, iss);
+                subMatrix(&rb_V2[0], Ai2, nInt2, nInt2, nInt2, nInt2, iss);
+                subMatInv(&rb_V2[0], nInt2, iss);
     
     
                 // Interaction effects
