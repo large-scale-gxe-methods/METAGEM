@@ -524,8 +524,6 @@ void printOutputHeader(bool mb, bool rb, bool additionalTest, std::string output
     
         if (mb)
         {
-            results2 << "Beta_Marginal\t" << "SE_Beta_Marginal\t";
-       
             // Print Int beta header
             for (size_t i = 0; i < nInt2; i++) 
             {
@@ -549,13 +547,15 @@ void printOutputHeader(bool mb, bool rb, bool additionalTest, std::string output
             }
 
             // Print p-values
-            results2 << "P_Value_Marginal\t" << "P_Value_Interaction\t" << "P_Value_Joint" << ((rb) ? "\t" : "\n");
+            if (!intNames2.empty() && intNames2[0] == "G") {
+                results2 << "P_Value_Interaction\t" << "P_Value_Joint" << ((rb) ? "\t" : "\n");
+            }else{
+                results2 << "P_Value_Interaction" << ((rb) ? "\t" : "\n");
+            }
         }
 
         if (rb)
         {
-            results2 << "robust_Beta_Marginal\t" << "robust_SE_Beta_Marginal\t";
-
             // Print beta header
             for (size_t i = 0; i < nInt2; i++) 
             {
@@ -577,8 +577,12 @@ void printOutputHeader(bool mb, bool rb, bool additionalTest, std::string output
                     }
                 }
             }
-
-            results2 << "robust_P_Value_Marginal\t" << "robust_P_Value_Interaction\t" << "robust_P_Value_Joint\n";
+            
+            if (!intNames2.empty() && intNames2[0] == "G"){
+                results2 << "robust_P_Value_Interaction\t" << "robust_P_Value_Joint\n";
+            }else{
+                results2 << "robust_P_Value_Interaction\n";
+            }
         }
     
         results2.close();
