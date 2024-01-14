@@ -715,7 +715,6 @@ void metagem(CommandLine cmd)
   
                 
                 // Print
-                oss2 << betaMarg << "\t" << sqrt(varMarg) << "\t";
                 for (size_t j = 0; j < nInt2; j++) {
                     oss2 << betaInt2[j] << "\t";
                 }
@@ -729,7 +728,11 @@ void metagem(CommandLine cmd)
                         }
                     }
                 }
-                oss2 << pvalMarg << "\t" << pvalInt << "\t" << pvalJoint << ((rb) ? "\t" : "\n");
+                if (!intNames2.empty() && intNames2[0] == "G"){
+                    oss2 << pvalInt << "\t" << pvalJoint << ((rb) ? "\t" : "\n");
+                }else{
+                    oss2 << pvalInt << ((rb) ? "\t" : "\n");
+                } 
     
                 std::fill(StempGE2.begin(), StempGE2.end(), 0.0);
                 std::fill(betaInt2.begin(), betaInt2.end(), 0.0);
@@ -784,7 +787,6 @@ void metagem(CommandLine cmd)
                 }
                 
                 // Print
-                oss2 << betaMarg << "\t" << sqrt(varMarg) << "\t";
                 for (size_t j = 0; j < nInt2; j++) {
                     oss2 << betaInt2[j] << "\t";
                 }
@@ -798,7 +800,11 @@ void metagem(CommandLine cmd)
                         }
                     }
                 }
-                oss2 << pvalMarg << "\t" << pvalInt << "\t" << pvalJoint << "\n";
+                if (!intNames2.empty() && intNames2[0] == "G"){
+                    oss2 << pvalInt << "\t" << pvalJoint << "\n";
+                }else{
+                    oss2 << pvalInt << "\n";
+                }
     
                 std::fill(StempGE2.begin(), StempGE2.end(), 0.0);
                 std::fill(betaInt2.begin(), betaInt2.end(), 0.0);
