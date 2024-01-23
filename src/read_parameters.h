@@ -20,7 +20,7 @@ public:
     std::string metaFileList;
 
     size_t nInt;
-    size_t nInt2;
+    size_t nInt2 = 1;
     size_t nCov;
     int metaOpt;
 
