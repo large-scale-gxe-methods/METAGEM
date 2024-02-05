@@ -83,6 +83,9 @@ Input/Output File Options:
      1: model-based summary statistics.                       
      2: robust summary statistics.                       
      Default: 0
+
+   --additional-test
+     The variable name(s) (may or may not include the genetic main effect G at first) and the full path of the output file for one additional test.
    
 ```
 </details>
@@ -144,6 +147,20 @@ The '--meta-option' flag can be used to specify which columns should be included
 * 2 - Only robust results from each study will be used in the meta-analysis, and summary statistics columns above without the 'robust_' prefix will be excluded from the output file.
 * Default: 0 
  
+<br />
+
+The '--additional-test' flag can be used to define an additional test to run. The genetic main effect 'G' may or may not be specified at first, indicating whether the additional test is a joint test or an interaction-only test. Then the name(s) of interaction(s) which will be included in the additional test should be listed. At last, the full path of the output file of the additonal test should be specified.
+
+For an example situation which has a total of 2 covariates (cov1 and cov2) in the full test, the '--additional-test' flag may be used as:
+```unix
+--additional-test G cov1 metagem2.out
+```
+This is to define an additional joint test with only cov1 as interaction. The flag may also be used as:
+```unix
+--additional-test cov1 metagem2.out
+```
+This is to define an additional interaction-only test with only cov1 as interaction.
+
 <br />
 
 ### Example
