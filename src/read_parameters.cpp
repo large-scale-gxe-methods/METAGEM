@@ -21,7 +21,7 @@ void CommandLine::processCommandLine(int argc, char* argv[]) {
     app.add_option("--exposure-names", intNames, "")->expected(1, 1000000)->required();
     app.add_option("--out", outFile_in, "")->expected(1);
     app.add_option("--meta-option", metaOpt_in, "");
-    app.add_option("--additional-test", additionalTestInfo, "Specify one additional test to run") -> expected(1, 100);
+    app.add_option("--additional-test", additionalTestInfo, "") -> expected(0, 100);
   
     try
     {
