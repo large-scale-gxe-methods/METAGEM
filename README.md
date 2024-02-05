@@ -149,7 +149,7 @@ The '--meta-option' flag can be used to specify which columns should be included
  
 <br />
 
-The '--additional-test' flag can be used to define an additional test to run. The genetic main effect 'G' may or may not be specified at first, indicating whether the additional test is a joint test or an interaction-only test. Then the name(s) of interaction(s) which will be included in the additional test should be listed. At last, the full path of the output file of the additonal test should be specified.
+The '--additional-test' flag can be used to define an additional test to run. The genetic main effect 'G' may or may not be specified at first, indicating whether the additional test is a joint test or an interaction-only test. Then the name(s) of interaction(s) which will be included in the additional test should be listed. At last, the full path of the output file of the additional test should be specified.
 
 For an example situation which has a total of 2 covariates (cov1 and cov2) in the full test, the '--additional-test' flag may be used as:
 ```unix
