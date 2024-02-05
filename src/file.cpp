@@ -1,6 +1,6 @@
 #include "metagem.h"
 
-void processFileHeader(int nInt1, bool mb, bool rb, std::vector<std::string> lc_intNames, std::vector<std::string> fileNames, FileInfo* fip) 
+void processFileHeader(int nInt1, int nInt2, bool mb, bool rb, bool additionalTest, std::vector<std::string> lc_intNames, std::vector<std::string> lc_intNames2, std::vector<std::string> fileNames, FileInfo* fip) 
 {
     for (size_t f = 0; f < fileNames.size(); f++) {
 
@@ -313,12 +313,131 @@ void processFileHeader(int nInt1, bool mb, bool rb, std::vector<std::string> lc_
             }
             fip->rb_covIntColumn[fileName] = rb_covIntColumn;
         }
+
+        // Additional test
+        if(additionalTest){
+            // Order the interactions base on the first vector of interactions
+            std::vector<int> betaIntColumn2;
+            std::vector<std::string> ord_betaIntNames2;
+            for (int i = 0; i < nInt2; i++)
+            {
+                auto it = std::find(lc_betaIntNames.begin(), lc_betaIntNames.end(), lc_intNames2[i]);
+                if (it != lc_betaIntNames.end())
+                {
+                    auto idx = std::distance(lc_betaIntNames.begin(), it);
+                    ord_betaIntNames2.push_back(betaIntNames[idx]);
+                    betaIntColumn2.push_back(columnNames["Beta_" + betaIntNames[idx]]);
+                }
+                else 
+                {
+                    cerr << "\nERROR: The file [" << fileName << "] does not contain the GxE term: " << lc_intNames2[i] << ".\n\n";
+                    exit(1);
+                }
+            }
+            fip->betaIntColumn2[fileName] = betaIntColumn2;
+
+        
+
+
+            // Get columns containing the model-based summary statistics for the interaction terms
+            if (mb)
+            {
+                std::vector<int> mb_covIntColumn2(nInt2 * nInt2);
+
+                for (int i = 0; i < nInt2; i++) 
+                {
+                    std::string s1 = "SE_Beta_" + ord_betaIntNames2[i];
+                    if (columnNames.find(s1) != columnNames.end()) 
+                    {
+                        mb_covIntColumn2[i*nInt2 + i] = columnNames[s1];
+                    }
+                    else 
+                    {
+                        printHeaderMissingError(fileName,  s1);
+                        exit(1);
+                    }
+                }
+
+                for (int i = 0; i < nInt2; i++) 
+                {
+                    for (int j = i+1; j < nInt2; j++) 
+                    {
+                        int idx;
+                        std::string s2 = "Cov_Beta_" + ord_betaIntNames2[i] + "_" + ord_betaIntNames2[j];
+                        std::string s3 = "Cov_Beta_" + ord_betaIntNames2[j] + "_" + ord_betaIntNames2[i];
+                        if (columnNames.find(s2) != columnNames.end()) 
+                        {
+                            idx = columnNames[s2];
+                        } 
+                        else if (columnNames.find(s3) != columnNames.end())
+                        {
+                            idx = columnNames[s3];
+                        }
+                        else 
+                        {
+                            cerr << "\nERROR: The file [" <<  fileName << "] does not contain the column " << s2 << " or " << s3 << ".\n\n";
+                            exit(1);
+                        }
+                        mb_covIntColumn2[(i * nInt2) + j] = idx;
+                        mb_covIntColumn2[(j * nInt2) + i] = idx;
+                    }
+                }
+                fip->mb_covIntColumn2[fileName] = mb_covIntColumn2;
+            }
+
+
+            // Get columns containing the robust summary statistics for the interaction terms	
+            if (rb)
+            {
+                std::vector<int> rb_covIntColumn2(nInt2 * nInt2);
+                for (int i = 0; i < nInt2; i++) 
+                {
+                    std::string s1 = "robust_SE_Beta_" + ord_betaIntNames2[i];
+                    if (columnNames.find(s1) != columnNames.end()) 
+                    {
+                        rb_covIntColumn2[i*nInt2 + i] = columnNames[s1];
+                    }
+                    else 
+                    {
+                        printHeaderMissingError(fileName,  s1);
+                        exit(1);
+                    }
+                }
+
+                for (int i = 0; i < nInt2; i++) 
+                {
+                    for (int j = i+1; j < nInt2; j++) 
+                    {
+                        int idx;
+                        std::string s2 = "robust_Cov_Beta_" + ord_betaIntNames2[i] + "_" + ord_betaIntNames2[j];
+                        std::string s3 = "robust_Cov_Beta_" + ord_betaIntNames2[j] + "_" + ord_betaIntNames2[i];
+
+                        if (columnNames.find(s2) != columnNames.end()) 
+                        {
+                            idx = columnNames[s2];
+                        } 
+                        else if (columnNames.find(s3) != columnNames.end())
+                        {
+                            idx = columnNames[s3];
+                        }
+                        else 
+                        {
+                            cerr << "\nERROR: The file [" <<  fileName << "] does not contain the column " << s2 << " or " << s3 << ".\n\n";
+                            exit(1);
+                        }
+                        rb_covIntColumn2[(i * nInt2) + j] = idx;
+                        rb_covIntColumn2[(j * nInt2) + i] = idx;
+                    }
+                }
+                fip->rb_covIntColumn2[fileName] = rb_covIntColumn2;
+            }
+        }
     }
 }
 
 
 
-void printOutputHeader(bool mb, bool rb, std::string output, size_t nInt1, std::vector<std::string> intNames) 
+void printOutputHeader(bool mb, bool rb, bool additionalTest, std::string output, std::string output2, size_t nInt1, size_t nInt2, std::vector<std::string> intNames, std::vector<std::string> intNames2) 
 {
     for(std::string &s : intNames){
         s = "G-" + s;
@@ -390,6 +509,84 @@ void printOutputHeader(bool mb, bool rb, std::string output, size_t nInt1, std::
     }
     
     results.close();
+
+    if(additionalTest){
+        for(std::string &s : intNames2){
+            if (s != "G") {
+                s = "G-" + s;
+              }
+        }
+
+
+        std::ofstream results2(output2, std::ofstream::binary);
+
+        results2 << "SNPID\t" << "CHR\t" << "POS\t" << "Non_Effect_Allele\t" << "Effect_Allele\t" << "N_files\t" << "N_Samples\t" << "AF\t";
+    
+        if (mb)
+        {
+            // Print Int beta header
+            for (size_t i = 0; i < nInt2; i++) 
+            {
+                results2 << "Beta_" << intNames2[i] << "\t";
+            }
+
+            // Print model-based covariance
+            for (size_t i = 0; i < nInt2; i++) 
+            {
+                results2 << "SE_Beta_" << intNames2[i] << "\t"; 
+            }
+            for (size_t i = 0; i < nInt2; i++) 
+            {
+                for (size_t j = 0; j < nInt2; j++) 
+                {
+                    if (i < j) 
+                    {
+                        results2 << "Cov_Beta_" << intNames2[i] << "_" << intNames2[j] << "\t"; 
+                    }
+                }
+            }
+
+            // Print p-values
+            if (!intNames2.empty() && intNames2[0] == "G") {
+                results2 << "P_Value_Interaction\t" << "P_Value_Joint" << ((rb) ? "\t" : "\n");
+            }else{
+                results2 << "P_Value_Interaction" << ((rb) ? "\t" : "\n");
+            }
+        }
+
+        if (rb)
+        {
+            // Print beta header
+            for (size_t i = 0; i < nInt2; i++) 
+            {
+                results2 << "robust_Beta_" << intNames2[i] << "\t";
+            }
+
+            // Print model-based covariance
+            for (size_t i = 0; i < nInt2; i++) 
+            {
+                results2 << "robust_SE_Beta_" << intNames2[i] << "\t"; 
+            }
+            for (size_t i = 0; i < nInt2; i++) 
+            {
+                for (size_t j = 0; j < nInt2; j++) 
+                {
+                    if (i < j) 
+                    {
+                        results2 << "robust_Cov_Beta_" << intNames2[i] << "_" << intNames2[j] << "\t"; 
+                    }
+                }
+            }
+            
+            if (!intNames2.empty() && intNames2[0] == "G"){
+                results2 << "robust_P_Value_Interaction\t" << "robust_P_Value_Joint\n";
+            }else{
+                results2 << "robust_P_Value_Interaction\n";
+            }
+        }
+    
+        results2.close();
+    }
 }
 
 

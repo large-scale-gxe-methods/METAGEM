@@ -27,12 +27,15 @@ class FileInfo {
         std::unordered_map<std::string, int> rb_seMargColumn;
 
         std::unordered_map<std::string, std::vector<int>> betaIntColumn;
+        std::unordered_map<std::string, std::vector<int>> betaIntColumn2;
         std::unordered_map<std::string, std::vector<int>> mb_covIntColumn;
+        std::unordered_map<std::string, std::vector<int>> mb_covIntColumn2;
         std::unordered_map<std::string, std::vector<int>> rb_covIntColumn;      
+        std::unordered_map<std::string, std::vector<int>> rb_covIntColumn2; 
 };
 
-void processFileHeader(int nInt1, bool mb, bool rb, std::vector<std::string> lc_intNames, std::vector<std::string> fileNames, FileInfo* fip);
-void printOutputHeader(bool mb, bool rb, std::string output, size_t nInt1, std::vector<std::string> intNames); 
+void processFileHeader(int nInt1, int nInt2, bool mb, bool rb, bool additionalTest, std::vector<std::string> lc_intNames, std::vector<std::string> lc_intNames2, std::vector<std::string> fileNames, FileInfo* fip);
+void printOutputHeader(bool mb, bool rb, bool additionalTest, std::string output, std::string output2, size_t nInt1, size_t nInt2, std::vector<std::string> intNames, std::vector<std::string> intNames2); 
 void printHeaderMissingError(std::string fileName, std::string column);
 
 #endif

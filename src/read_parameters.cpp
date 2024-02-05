@@ -21,7 +21,8 @@ void CommandLine::processCommandLine(int argc, char* argv[]) {
     app.add_option("--exposure-names", intNames, "")->expected(1, 1000000)->required();
     app.add_option("--out", outFile_in, "")->expected(1);
     app.add_option("--meta-option", metaOpt_in, "");
-
+    app.add_option("--additional-test", additionalTestInfo, "") -> expected(0, 100);
+  
     try
     {
         app.parse( argc, argv);
@@ -154,6 +155,77 @@ void CommandLine::processCommandLine(int argc, char* argv[]) {
             cerr << "\nERROR: The --meta-option integer value must be 0, 1, or 2.\n\n";
             exit(1);
         }
+
+        // Additional test
+        if (!additionalTestInfo.empty()) {
+          additionalTest = true;
+          
+          if (additionalTestInfo.size() == 1) {
+            cerr << "ERROR: Both of the variable name and full path of the additional output file should be specified.\n\n";
+            exit(1); 
+          }
+
+          // Check if the full path of the additional output file specified at the end
+          const std::string& lastTestInfo = additionalTestInfo.back();
+          for (const auto& name : intNames) {
+            if (lastTestInfo == name) {
+              cerr << "ERROR: Please specify the full path of the additional output file at the end of '--additional test' flag.\n\n";
+              exit(1);
+            }
+          }
+
+          // Check if "G" exists in additionalTestInfo but not at the first position
+          for (size_t i = 1; i < additionalTestInfo.size(); ++i) {
+          if (additionalTestInfo[i] == "G") {
+              std::cerr << "ERROR: Please specify the genetic main effect at the first place of '--additional test' flag.\n\n";
+              exit(1);
+            }
+          }
+          
+          intNames2.assign(additionalTestInfo.begin(), additionalTestInfo.end() - 1);
+          outFile2 = additionalTestInfo.back();
+          std::set<std::string> s(intNames2.begin(), intNames2.end());
+          if (s.size() != intNames2.size()) {
+              cerr << "\nERROR: There are duplicate variable names in the additional test.\n\n";
+              exit(1);
+          }
+          nInt2 = intNames2.size();
+          
+          lcIntNames2 = intNames2;
+          for(std::string &s : lcIntNames2){
+              std::transform(s.begin(), s.end(), s.begin(), [](char c){ return std::tolower(c); });
+              if (s != "g") {
+                s = "g-" + s;
+              }
+          }
+
+          // Additional output file
+          std::ofstream results2(outFile2);
+          if (!results2) {
+              printOpenFileError(outFile2);
+          }
+
+          if (results2.fail()) {
+              printOpenFileError(outFile2);
+          }
+
+          results2 << "test" << endl;
+          if (results2.fail()) {
+              cerr << "\nERROR: Cannot write to the additional output file.\n\n";
+              results2.close();
+            
+              if (std::remove(outFile2.c_str()) != 0) {
+                  cerr << "\nERROR: Cannot delete the additional output file.\n\n";
+              }
+              exit(1);
+          }
+          results2.close();
+        
+          if (std::remove(outFile2.c_str()) != 0) {
+              cerr << "\nERROR: Cannot delete the additional output file.\n\n";
+              exit(1);
+          }
+        }
     }
     catch( const CLI::CallForHelp &e )
     {
@@ -176,7 +248,8 @@ void print_help() {
         << "   --input-file-list \t A no header text file containing a single file name per line." << endl
         << "   --exposure-names \t The names of the exposure(s) to be included in the meta-analysis." << endl
         << "   --out \t\t Full path and extension to where METAGEM output results. \n \t\t\t    Default: metagem.out" << endl
-        << "   --meta-option \t Integer value indicating which summary statistics should be used for meta-analysis. \n\t\t\t    0: Both model-based and robust summary statistics. \n \t\t\t    1: model-based summary statistics. \n \t\t\t    2: robust summary statistics. \n \t\t\t    Default: 0" << endl;
+        << "   --meta-option \t Integer value indicating which summary statistics should be used for meta-analysis. \n\t\t\t    0: Both model-based and robust summary statistics. \n \t\t\t    1: model-based summary statistics. \n \t\t\t    2: robust summary statistics. \n \t\t\t    Default: 0" << endl
+        << "   --additional-test \t The variable names (may or may not include the genetic main effect G at first) and the full path of the output file for one additional test." << endl;
     cout << endl << endl;
     cout << endl << endl;
 }
