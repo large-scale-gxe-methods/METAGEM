@@ -159,6 +159,14 @@ For comments, suggestions, bug reports and questions, please contact Han Chen (H
 <br />
 <br />
 
+## References
+If you use REGEM, please cite
+* Pham DT, Westerman KE, Pan C, Chen L, Srinivasan S, Isganaitis E, Vajravelu ME, Bacha F, Chernausek S, Gubitosi-Klug R, Divers J, Pihoker C, Marcovina SM, Manning AK, Chen H. (2023) Re-analysis and meta-analysis of summary statistics from gene-environment interaction studies. Bioinformatics 39(12):btad730. PubMed PMID: [**38039147**](https://www.ncbi.nlm.nih.gov/pubmed/38039147). PMCID: [**PMC10724851**](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10724851/). DOI: [**10.1093/bioinformatics/btad730**](https://doi.org/10.1093/bioinformatics/btad730). 
+ 
+
+<br />
+<br />
+
 ## License 
 
  ```
