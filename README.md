@@ -154,7 +154,7 @@ The '--meta-option' flag can be used to specify which columns should be included
 <br />
 
 ## Contact 
-For comments, suggestions, bug reports and questions, please contact Han Chen (Han.Chen.2@uth.tmc.edu), Alisa Manning (AKMANNING@mgh.harvard.edu), Kenneth Westerman (KEWESTERMAN@mgh.harvard.edu) or Cong Pan (Cong.Pan@uth.tmc.edu). For bug reports, please include an example to reproduce the problem without having to access your confidential data.
+For comments, suggestions, bug reports and questions, please contact Han Chen (Han.Chen.2@uth.tmc.edu), Alisa Manning (AKMANNING@mgh.harvard.edu), or Kenneth Westerman (KEWESTERMAN@mgh.harvard.edu). For bug reports, please include an example to reproduce the problem without having to access your confidential data.
 
 <br />
 <br />
