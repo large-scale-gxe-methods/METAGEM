@@ -11,17 +11,22 @@ public:
     std::vector<std::string> fileNames;
     std::vector<std::string> intNames;
     std::vector<std::string> lcIntNames;
+    std::vector<std::string> intNames2;
+    std::vector<std::string> lcIntNames2;
+    std::vector<std::string> additionalTestInfo;
 
     std::string outFile;
+    std::string outFile2;
     std::string metaFileList;
 
     size_t nInt;
+    size_t nInt2 = 1;
     size_t nCov;
     int metaOpt;
 
     bool mb = false;
     bool rb = false;
-
+    bool additionalTest = false;
     void processCommandLine(int argc, char* argv[]);
 };
 

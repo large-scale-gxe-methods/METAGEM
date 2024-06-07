@@ -21,7 +21,9 @@ void CommandLine::processCommandLine(int argc, char* argv[]) {
     app.add_option("--exposure-names", intNames, "")->expected(1, 1000000)->required();
     app.add_option("--out", outFile_in, "")->expected(1);
     app.add_option("--meta-option", metaOpt_in, "");
-
+    app.add_option("--additional-joint", additionalJointInfo, "") -> expected(0, 100);
+    app.add_option("--additional-interaction", additionalInteractionInfo, "") -> expected(0, 100);
+  
     try
     {
         app.parse( argc, argv);
@@ -154,6 +156,128 @@ void CommandLine::processCommandLine(int argc, char* argv[]) {
             cerr << "\nERROR: The --meta-option integer value must be 0, 1, or 2.\n\n";
             exit(1);
         }
+
+        // Additional joint test
+        if (!additionalJointInfo.empty()) {
+          additionalJoint = true;
+          
+          if (additionalJointInfo.size() == 1) {
+            cerr << "ERROR: Both of the variable name and full path of the additional joint test output file should be specified.\n\n";
+            exit(1); 
+          }
+
+          // Check if the full path of the additional output file specified at the end
+          const std::string& lastTestInfo = additionalJointInfo.back();
+          for (const auto& name : intNames) {
+            if (lastTestInfo == name) {
+              cerr << "ERROR: Please specify the full path of the additional output file at the end of '--additional_joint' flag.\n\n";
+              exit(1);
+            }
+          }
+          
+          intNames2.assign(additionalJointInfo.begin(), additionalJointInfo.end() - 1);
+          outFile2 = additionalJointInfo.back();
+          std::set<std::string> s(intNames2.begin(), intNames2.end());
+          if (s.size() != intNames2.size()) {
+              cerr << "\nERROR: There are duplicate variable names in the additional joint test.\n\n";
+              exit(1);
+          }
+          nInt2 = intNames2.size();
+          
+          lcIntNames2 = intNames2;
+          for(std::string &s : lcIntNames2){
+              std::transform(s.begin(), s.end(), s.begin(), [](char c){ return std::tolower(c); });
+              s = "g-" + s;
+          }
+
+          // Additional output file
+          std::ofstream results2(outFile2);
+          if (!results2) {
+              printOpenFileError(outFile2);
+          }
+
+          if (results2.fail()) {
+              printOpenFileError(outFile2);
+          }
+
+          results2 << "test" << endl;
+          if (results2.fail()) {
+              cerr << "\nERROR: Cannot write to the additional joint test output file.\n\n";
+              results2.close();
+            
+              if (std::remove(outFile2.c_str()) != 0) {
+                  cerr << "\nERROR: Cannot delete the additional joint test output file.\n\n";
+              }
+              exit(1);
+          }
+          results2.close();
+        
+          if (std::remove(outFile2.c_str()) != 0) {
+              cerr << "\nERROR: Cannot delete the additional joint test output file.\n\n";
+              exit(1);
+          }
+        }
+
+      // Additional interaction test
+        if (!additionalInteractionInfo.empty()) {
+          additionalInteraction = true;
+          
+          if (additionalInteractionInfo.size() == 1) {
+            cerr << "ERROR: Both of the variable name and full path of the additional interaction-only test output file should be specified.\n\n";
+            exit(1); 
+          }
+
+          // Check if the full path of the additional output file specified at the end
+          const std::string& lastTestInfo = additionalJointInfo.back();
+          for (const auto& name : intNames) {
+            if (lastTestInfo == name) {
+              cerr << "ERROR: Please specify the full path of the additional output file at the end of '--additional_joint' flag.\n\n";
+              exit(1);
+            }
+          }
+          
+          intNames2.assign(additionalJointInfo.begin(), additionalJointInfo.end() - 1);
+          outFile2 = additionalJointInfo.back();
+          std::set<std::string> s(intNames2.begin(), intNames2.end());
+          if (s.size() != intNames2.size()) {
+              cerr << "\nERROR: There are duplicate variable names in the additional joint test.\n\n";
+              exit(1);
+          }
+          nInt2 = intNames2.size();
+          
+          lcIntNames2 = intNames2;
+          for(std::string &s : lcIntNames2){
+              std::transform(s.begin(), s.end(), s.begin(), [](char c){ return std::tolower(c); });
+              s = "g-" + s;
+          }
+
+          // Additional output file
+          std::ofstream results2(outFile2);
+          if (!results2) {
+              printOpenFileError(outFile2);
+          }
+
+          if (results2.fail()) {
+              printOpenFileError(outFile2);
+          }
+
+          results2 << "test" << endl;
+          if (results2.fail()) {
+              cerr << "\nERROR: Cannot write to the additional joint test output file.\n\n";
+              results2.close();
+            
+              if (std::remove(outFile2.c_str()) != 0) {
+                  cerr << "\nERROR: Cannot delete the additional joint test output file.\n\n";
+              }
+              exit(1);
+          }
+          results2.close();
+        
+          if (std::remove(outFile2.c_str()) != 0) {
+              cerr << "\nERROR: Cannot delete the additional joint test output file.\n\n";
+              exit(1);
+          }
+        }
     }
     catch( const CLI::CallForHelp &e )
     {
@@ -176,7 +300,9 @@ void print_help() {
         << "   --input-file-list \t A no header text file containing a single file name per line." << endl
         << "   --exposure-names \t The names of the exposure(s) to be included in the meta-analysis." << endl
         << "   --out \t\t Full path and extension to where METAGEM output results. \n \t\t\t    Default: metagem.out" << endl
-        << "   --meta-option \t Integer value indicating which summary statistics should be used for meta-analysis. \n\t\t\t    0: Both model-based and robust summary statistics. \n \t\t\t    1: model-based summary statistics. \n \t\t\t    2: robust summary statistics. \n \t\t\t    Default: 0" << endl;
+        << "   --meta-option \t Integer value indicating which summary statistics should be used for meta-analysis. \n\t\t\t    0: Both model-based and robust summary statistics. \n \t\t\t    1: model-based summary statistics. \n \t\t\t    2: robust summary statistics. \n \t\t\t    Default: 0" << endl
+        << "   --additional-joint \t The variable names and the full path of the output file for one additional joint test." << endl;
+        << "   --additional-interaction \t The variable names and the full path of the output file for one additional interation-only test." << endl;
     cout << endl << endl;
     cout << endl << endl;
 }

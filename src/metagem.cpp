@@ -46,17 +46,20 @@ void metagem(CommandLine cmd)
     // Read the header of each file
     printProcessingFiles();
     FileInfo* fip = new FileInfo();
-    processFileHeader(cmd.nInt + 1, cmd.mb, cmd.rb, cmd.lcIntNames, cmd.fileNames, fip);
+    processFileHeader(cmd.nInt + 1, cmd.nInt2, cmd.mb, cmd.rb, cmd.additionalTest, cmd.lcIntNames, cmd.lcIntNames2, cmd.fileNames, fip);
 
     // Initialize objects
     int nvars = 0;
     bool mb = cmd.mb;
     bool rb = cmd.rb;
+    bool additionalTest = cmd.additionalTest;
     size_t nInt   = cmd.nInt;
+    size_t nInt2   = cmd.nInt2;
     size_t nInt1  = nInt + 1; // plus G
     size_t nFiles = cmd.fileNames.size();
 
     int nInt1_sq = nInt1 * nInt1;
+    int nInt2_sq = nInt2 * nInt2;
     std::vector<std::string> snpid;
     std::vector<std::string> effectAllele;
     std::vector<std::string> nonEffectAllele;
@@ -72,6 +75,10 @@ void metagem(CommandLine cmd)
     std::vector<double> rb_MV;
     std::vector<double> rb_U;
     std::vector<double> rb_V;
+    std::vector<double> mb_U2;
+    std::vector<double> mb_V2;
+    std::vector<double> rb_U2;
+    std::vector<double> rb_V2;
     sparse_hash_map<std::pair<std::string, std::string>, int> snpid_idx;
     
     for (size_t f = 0; f < nFiles; f++)
@@ -88,6 +95,7 @@ void metagem(CommandLine cmd)
         int betaMargColumn   = fip->betaMargColumn[fileName];	
         int nheader          = fip->nheader[fileName];
         std::vector<int> betaIntColumn = fip->betaIntColumn[fileName];
+        std::vector<int> betaIntColumn2 = fip->betaIntColumn2[fileName];
 
         // Read input file
         std::ifstream file;
@@ -218,6 +226,57 @@ void metagem(CommandLine cmd)
                     subMatsubVecprod(&rb_V[0], &fileBetaInt[0], &rb_U[0], nInt1, nInt1, vi, 0, ui);
                 }
 
+                if(additionalTest){
+                    // Matrix indices
+                    int ui = nvars * nInt2;
+                    int vi = nvars * nInt2_sq;
+    
+                    // Betas
+                    std::vector<double> fileBetaInt2(nInt2);
+                    for (size_t i = 0; i < nInt2; i++) {
+                        fileBetaInt2[i] = std::stod(values[betaIntColumn2[i]]);
+                    }
+    
+                    // Model-based
+                    if (mb)
+                    {
+                        // Interaction
+                        mb_U2.resize(mb_U2.size() + nInt2);
+                        std::vector<int> mb_covIntColumn2 = fip->mb_covIntColumn2[fileName];
+                        for (size_t i = 0; i < nInt2; i++) {
+                            size_t isq = (i * nInt2);
+                            size_t ii  = vi + isq;
+                            for (size_t j = 0; j < nInt2; j++) {
+                                mb_V2.push_back(std::stod(values[mb_covIntColumn2[isq + j]]));
+                            }
+                            mb_V2[ii + i] *= mb_V2[ii + i];
+                        }
+    
+                        // Add to main matrix
+                        subMatInv(&mb_V2[0], nInt2, vi);
+                        subMatsubVecprod(&mb_V2[0], &fileBetaInt2[0], &mb_U2[0], nInt2, nInt2, vi, 0, ui);
+                    }
+    
+                    // Robust
+                    if (rb)
+                    {
+                        // Interaction
+                        rb_U2.resize(rb_U2.size() + nInt2);
+                        std::vector<int> rb_covIntColumn2 = fip->rb_covIntColumn2[fileName];
+                        for (size_t i = 0; i < nInt2; i++) {
+                            size_t isq = (i * nInt2);
+                            size_t ii  = vi + isq;
+                            for (size_t j = 0; j < nInt2; j++) {
+                                rb_V2.push_back(std::stod(values[rb_covIntColumn2[isq + j]]));
+                            }
+                            rb_V2[ii + i] *= rb_V2[ii + i];
+                        }
+    
+                        // Add to main matrix
+                        subMatInv(&rb_V2[0], nInt2, vi);
+                        subMatsubVecprod(&rb_V2[0], &fileBetaInt2[0], &rb_U2[0], nInt2, nInt2, vi, 0, ui);
+                    }
+                }
                 nvars++;
             } else {
                 
@@ -326,6 +385,74 @@ void metagem(CommandLine cmd)
                         }
                     }
                 }
+
+                if(additionalTest){
+                    // Matrix index
+                    int ui = index * nInt2;
+                    int vi = index * (nInt2 * nInt2);
+    
+                    // Betas
+                    std::vector<double> fileBetaInt2(nInt2);
+                    for (size_t i = 0; i < nInt2; i++) {
+                        fileBetaInt2[i] = std::stod(values[betaIntColumn2[i]]) * dir;
+                    }
+    
+                    // Model-based
+                    if (mb)
+                    {
+                        // Interactions
+                        std::vector<double> mb_fileU2(nInt2);
+                        std::vector<double> mb_fileV2(nInt2 * nInt2);
+                        std::vector<int> mb_covIntColumn2 = fip->mb_covIntColumn2[fileName];
+    
+                        for (size_t i = 0; i < nInt2; i++) {
+                            size_t ii = i * nInt2;
+                            for (size_t j = 0; j < nInt2; j++) {
+                                mb_fileV2[ii + j] = std::stod(values[mb_covIntColumn2[ii + j]]);
+                            }
+                            mb_fileV2[ii + i] *= mb_fileV2[ii + i];
+                        }
+    
+                        // Add to main matrix
+                        matInv(&mb_fileV2[0], nInt2);
+                        matvecprod(&mb_fileV2[0], &fileBetaInt2[0], &mb_fileU2[0], nInt2, nInt2);
+                        for (size_t i = 0; i < nInt2; i++){
+                            size_t ii = i * nInt2;
+                            mb_U2[ui + i] += mb_fileU2[i];
+                            for (size_t j = 0; j < nInt2; j++) {
+                                mb_V2[vi + ii + j] += mb_fileV2[ii + j];
+                            }
+                        }
+                    }
+    
+                    // Robust
+                    if (rb)
+                    {
+                        // Interactions
+                        std::vector<double> rb_fileU2(nInt2);
+                        std::vector<double> rb_fileV2(nInt2 * nInt2);
+                        std::vector<int> rb_covIntColumn2 = fip->rb_covIntColumn2[fileName];
+                        
+                        for (size_t i = 0; i < nInt2; i++) {
+                            size_t ii = i * nInt2;
+                            for (size_t j = 0; j < nInt2; j++) {
+                                rb_fileV2[ii + j] = std::stod(values[rb_covIntColumn2[ii + j]]);
+                            }
+                            rb_fileV2[ii + i] *= rb_fileV2[ii + i];
+                        }
+    
+                        // Add to main matrix
+                        matInv(&rb_fileV2[0], nInt2);
+                        matvecprod(&rb_fileV2[0], &fileBetaInt2[0], &rb_fileU2[0], nInt2, nInt2);
+                        for (size_t i = 0; i < nInt2; i++) {
+                            size_t ii = i * nInt2;
+                            rb_U2[ui + i] += rb_fileU2[i];
+                            for (size_t j = 0; j < nInt2; j++) {
+                                rb_V2[vi + ii + j] += rb_fileV2[ii + j];
+                            }
+                        }
+                    }
+                }
             }
             n++;
         }
@@ -341,9 +468,11 @@ void metagem(CommandLine cmd)
     printDone(2);
 
     // Create the output file and write column header names
-    printOutputHeader(mb, rb, cmd.outFile, nInt1, cmd.intNames);
+    printOutputHeader(mb, rb, additionalTest, cmd.outFile, cmd.outFile2, nInt1, nInt2, cmd.intNames, cmd.intNames2);
     std::ofstream results(cmd.outFile, std::ios_base::app);
+    std::ofstream results2(cmd.outFile2, std::ios_base::app);
     std::ostringstream oss;
+    std::ostringstream oss2;
 
 
 
@@ -359,12 +488,20 @@ void metagem(CommandLine cmd)
     double pvalJoint;
     double* Ai = new double[nInt1 * nInt1];
     double* VE = new double[nInt * nInt];
+    double* Ai2 = new double[nInt2 * nInt2];
+    double* VE2 = nullptr;
     std::vector<double> StempE(nInt, 0.0);
     std::vector<double> StempGE(nInt1, 0.0);
     std::vector<double> betaInt(nInt1, 0.0);
+    std::vector<double> StempE2;
+    std::vector<double> StempGE2(nInt2, 0.0);
+    std::vector<double> betaInt2(nInt2, 0.0);
     boost::math::chi_squared chisq_dist_M(1);
+    std::vector<std::string> intNames2 = cmd.intNames2;
     boost::math::chi_squared chisq_dist_Int(nInt);
     boost::math::chi_squared chisq_dist_Joint(nInt1);
+    boost::math::chi_squared chisq_dist_Int2(nInt2);
+    boost::math::chi_squared chisq_dist_Joint2(nInt2);
 
     printMetaBegin(nFiles, nvars);
     for (int i = 0; i < nvars; i++)
@@ -373,6 +510,7 @@ void metagem(CommandLine cmd)
         int iss = (i * nInt1 * nInt1);
 
         oss << snpid[i] << nSeen[i] << "\t" << nSamples[i] << "\t" << AF[i] / 2.0 / nSamples[i] << "\t";
+        oss2 << snpid[i] << nSeen[i] << "\t" << nSamples[i] << "\t" << AF[i] / 2.0 / nSamples[i] << "\t";
         if (mb)
         {
             subMatrix(&mb_V[0], Ai, nInt1, nInt1, nInt1, nInt1, iss);
@@ -521,6 +659,164 @@ void metagem(CommandLine cmd)
             oss.str(std::string());
             oss.clear();
         }
+
+        if(additionalTest){
+            int is  = (i * nInt2);
+            int iss = (i * nInt2 * nInt2);
+    
+            if (mb)
+            {
+                subMatrix(&mb_V2[0], Ai2, nInt2, nInt2, nInt2, nInt2, iss);
+                subMatInv(&mb_V2[0], nInt2, iss);
+    
+    
+                // Interaction effects
+                for (size_t j = 0; j < nInt2; j++) {
+                    for (size_t k = 0; k < nInt2; k++) {
+                        betaInt2[j] += (mb_V2[iss + (nInt2 * j) + k] * mb_U2[is + k]);
+                    }
+                }
+    
+                 
+    
+                // Joint P-value
+                for (size_t j = 0; j < nInt2; j++) {
+                    for (size_t k = 0; k < nInt2; k++) {
+                        StempGE2[j] += (Ai2[(nInt2 * j) + k] * betaInt2[k]);
+                    }
+                }
+
+                statJoint = 0.0;
+                for (size_t k = 0; k < nInt2; k++)
+                    statJoint += betaInt2[k] * StempGE2[k];
+                pvalJoint = (std::isnan(statJoint) || statJoint <= 0.0) ? NAN : boost::math::cdf(complement(chisq_dist_Joint2, statJoint));
+                
+                if (!intNames2.empty() && intNames2[0] == "G") {
+                    // Int P-value
+                    double* VE2 = new double[(nInt2-1) * (nInt2-1)];
+                    StempE2.resize(nInt2-1, 0.0);
+                    chisq_dist_Int2 = boost::math::chi_squared(nInt2-1);
+                    subMatrix(&mb_V2[0], VE2, nInt2-1, nInt2-1, nInt2, nInt2-1, iss + nInt2 + 1);
+                    matInv(VE2, nInt2-1);
+                    for (size_t j = 0; j < (nInt2-1); j++) {
+                        for (size_t k = 0; k < (nInt2-1); k++) {
+                            StempE2[j] += (VE2[((nInt2-1) * j) + k] * betaInt2[k + 1]);
+                        }
+                    }
+
+                    statInt = 0.0;
+                    for (size_t j = 1; j < nInt2; j++) 
+                        statInt += betaInt2[j] * StempE2[j-1];
+                    pvalInt = (std::isnan(statInt) || statInt <= 0.0) ? NAN : boost::math::cdf(complement(chisq_dist_Int2, statInt));
+                    std::fill(StempE2.begin(), StempE2.end(), 0.0);
+                }else{
+                    pvalInt = pvalJoint;
+                }
+  
+                
+                // Print
+                for (size_t j = 0; j < nInt2; j++) {
+                    oss2 << betaInt2[j] << "\t";
+                }
+                for (size_t ii = 0; ii < nInt2; ii++) {
+                    oss2 << sqrt(mb_V2[iss + (ii * nInt2) + ii]) << "\t";
+                }
+                for (size_t ii = 0; ii < nInt2; ii++) {
+                    for (size_t jj = 0; jj < nInt2; jj++) {
+                        if (ii < jj) {
+                            oss2 << mb_V2[iss + (ii * nInt2) + jj] << "\t";
+                        }
+                    }
+                }
+                if (!intNames2.empty() && intNames2[0] == "G"){
+                    oss2 << pvalInt << "\t" << pvalJoint << ((rb) ? "\t" : "\n");
+                }else{
+                    oss2 << pvalInt << ((rb) ? "\t" : "\n");
+                } 
+    
+                std::fill(StempGE2.begin(), StempGE2.end(), 0.0);
+                std::fill(betaInt2.begin(), betaInt2.end(), 0.0);
+            }
+    
+            if (rb)
+            {
+                subMatrix(&rb_V2[0], Ai2, nInt2, nInt2, nInt2, nInt2, iss);
+                subMatInv(&rb_V2[0], nInt2, iss);
+    
+    
+                // Interaction effects
+                for (size_t j = 0; j < nInt2; j++) {
+                    for (size_t k = 0; k < nInt2; k++) {
+                        betaInt2[j] += (rb_V2[iss + (nInt2 * j) + k] * rb_U2[is + k]);
+                    }
+                }
+    
+    
+                // Joint P-value
+                for (size_t j = 0; j < nInt2; j++) {
+                    for (size_t k = 0; k < nInt2; k++) {
+                        StempGE2[j] += (Ai2[(nInt2 * j) + k] * betaInt2[k]);
+                    }
+                }
+    
+                statJoint = 0.0;
+                for (size_t k = 0; k < nInt2; k++)
+                    statJoint += betaInt2[k] * StempGE2[k];
+                pvalJoint = (std::isnan(statJoint) || statJoint <= 0.0) ? NAN : boost::math::cdf(complement(chisq_dist_Joint2, statJoint));
+    
+                if (!intNames2.empty() && intNames2[0] == "G") {
+                    // Int P-value
+                    double* VE2 = new double[(nInt2-1) * (nInt2-1)];
+                    StempE2.resize(nInt2-1, 0.0);
+                    chisq_dist_Int2 = boost::math::chi_squared(nInt2-1);
+                    subMatrix(&rb_V[0], VE2, nInt2-1, nInt2-1, nInt2, nInt2-1, iss + nInt2 + 1);
+                    matInv(VE2, nInt2-1);
+                    for (size_t j = 0; j < (nInt2-1); j++) {
+                            for (size_t k = 0; k < (nInt2-1); k++) {
+                                StempE2[j] += (VE2[((nInt2-1) * j) + k] * betaInt2[k + 1]);
+                            }
+                    }
+        
+                    statInt = 0.0;
+                    for (size_t j = 1; j < nInt2; j++) 
+                        statInt += betaInt2[j] * StempE2[j-1];
+                    pvalInt = (std::isnan(statInt) || statInt <= 0.0) ? NAN : boost::math::cdf(complement(chisq_dist_Int2, statInt));
+                    std::fill(StempE2.begin(), StempE2.end(), 0.0);
+                }else{
+                    pvalInt = pvalJoint;
+                }
+                
+                // Print
+                for (size_t j = 0; j < nInt2; j++) {
+                    oss2 << betaInt2[j] << "\t";
+                }
+                for (size_t ii = 0; ii < nInt2; ii++) {
+                    oss2 << sqrt(rb_V2[iss + (ii * nInt2) + ii]) << "\t";
+                }
+                for (size_t ii = 0; ii < nInt2; ii++) {
+                    for (size_t jj = 0; jj < nInt2; jj++) {
+                        if (ii < jj) {
+                            oss2 << rb_V2[iss + (ii * nInt2) + jj] << "\t";
+                        }
+                    }
+                }
+                if (!intNames2.empty() && intNames2[0] == "G"){
+                    oss2 << pvalInt << "\t" << pvalJoint << "\n";
+                }else{
+                    oss2 << pvalInt << "\n";
+                }
+    
+                std::fill(StempGE2.begin(), StempGE2.end(), 0.0);
+                std::fill(betaInt2.begin(), betaInt2.end(), 0.0);
+            }
+    
+            if (i % 100000 == 0)
+            {
+                results2 << oss2.str();
+                oss2.str(std::string());
+                oss2.clear();
+            }
+        } 
     }
 
     results << oss.str();
@@ -528,11 +824,22 @@ void metagem(CommandLine cmd)
     oss.clear();
     results.close();
 
+    results2 << oss2.str();
+    oss2.str(std::string());
+    oss2.clear();
+    results2.close();
+
     delete[] Ai;
     delete[] VE;
 
+    delete[] Ai2;
+    delete[] VE2;
+    
     printDone(2);
     printOutputLocation(cmd.outFile);
+    if(additionalTest){
+        printOutputLocation(cmd.outFile2);
+    }
 }
 
 void printWelcome() {
