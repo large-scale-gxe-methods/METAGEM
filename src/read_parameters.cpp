@@ -170,7 +170,7 @@ void CommandLine::processCommandLine(int argc, char* argv[]) {
           const std::string& lastTestInfo = additionalJointInfo.back();
           for (const auto& name : intNames) {
             if (lastTestInfo == name) {
-              cerr << "ERROR: Please specify the full path of the additional output file at the end of '--additional_joint' flag.\n\n";
+              cerr << "ERROR: Please specify the full path of the additional output file at the end of '--additional-joint' flag.\n\n";
               exit(1);
             }
           }
@@ -228,53 +228,53 @@ void CommandLine::processCommandLine(int argc, char* argv[]) {
           }
 
           // Check if the full path of the additional output file specified at the end
-          const std::string& lastTestInfo = additionalJointInfo.back();
+          const std::string& lastTestInfo = additionalInteractionInfo.back();
           for (const auto& name : intNames) {
             if (lastTestInfo == name) {
-              cerr << "ERROR: Please specify the full path of the additional output file at the end of '--additional_joint' flag.\n\n";
+              cerr << "ERROR: Please specify the full path of the additional output file at the end of '--additional-interaction' flag.\n\n";
               exit(1);
             }
           }
           
-          intNames2.assign(additionalJointInfo.begin(), additionalJointInfo.end() - 1);
-          outFile2 = additionalJointInfo.back();
-          std::set<std::string> s(intNames2.begin(), intNames2.end());
-          if (s.size() != intNames2.size()) {
-              cerr << "\nERROR: There are duplicate variable names in the additional joint test.\n\n";
+          intNames3.assign(additionalInteractionInfo.begin(), additionalInteractionInfo.end() - 1);
+          outFile3 = additionalInteractionInfo.back();
+          std::set<std::string> s(intNames3.begin(), intNames3.end());
+          if (s.size() != intNames3.size()) {
+              cerr << "\nERROR: There are duplicate variable names in the additional interaction-only test.\n\n";
               exit(1);
           }
-          nInt2 = intNames2.size();
+          nInt3 = intNames3.size();
           
-          lcIntNames2 = intNames2;
-          for(std::string &s : lcIntNames2){
+          lcIntNames3 = intNames3;
+          for(std::string &s : lcIntNames3){
               std::transform(s.begin(), s.end(), s.begin(), [](char c){ return std::tolower(c); });
               s = "g-" + s;
           }
 
           // Additional output file
-          std::ofstream results2(outFile2);
-          if (!results2) {
-              printOpenFileError(outFile2);
+          std::ofstream results3(outFile3);
+          if (!results3) {
+              printOpenFileError(outFile3);
           }
 
-          if (results2.fail()) {
-              printOpenFileError(outFile2);
+          if (results3.fail()) {
+              printOpenFileError(outFile3);
           }
 
-          results2 << "test" << endl;
-          if (results2.fail()) {
-              cerr << "\nERROR: Cannot write to the additional joint test output file.\n\n";
-              results2.close();
+          results3 << "test" << endl;
+          if (results3.fail()) {
+              cerr << "\nERROR: Cannot write to the additional interaction-only test output file.\n\n";
+              results3.close();
             
-              if (std::remove(outFile2.c_str()) != 0) {
-                  cerr << "\nERROR: Cannot delete the additional joint test output file.\n\n";
+              if (std::remove(outFile3.c_str()) != 0) {
+                  cerr << "\nERROR: Cannot delete the additional interaction-only test output file.\n\n";
               }
               exit(1);
           }
-          results2.close();
+          results3.close();
         
-          if (std::remove(outFile2.c_str()) != 0) {
-              cerr << "\nERROR: Cannot delete the additional joint test output file.\n\n";
+          if (std::remove(outFile3.c_str()) != 0) {
+              cerr << "\nERROR: Cannot delete the additional interaction-only test output file.\n\n";
               exit(1);
           }
         }
