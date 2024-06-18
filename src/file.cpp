@@ -1,6 +1,6 @@
 #include "metagem.h"
 
-void processFileHeader(int nInt1, int nInt2, bool mb, bool rb, bool additionalTest, std::vector<std::string> lc_intNames, std::vector<std::string> lc_intNames2, std::vector<std::string> fileNames, FileInfo* fip) 
+void processFileHeader(int nInt1, int nInt2, int nInt3, bool mb, bool rb, bool additionalJoint, bool additionalInteraction,std::vector<std::string> lc_intNames, std::vector<std::string> lc_intNames2, std::vector<std::string> lc_intNames3, std::vector<std::string> fileNames, FileInfo* fip) 
 {
     for (size_t f = 0; f < fileNames.size(); f++) {
 
