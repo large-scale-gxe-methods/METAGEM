@@ -25,7 +25,7 @@ public:
 
     size_t nInt;
     size_t nInt2 = 1;
-    size_t nInt2 = 2;
+    size_t nInt3 = 1;
     size_t nCov;
     int metaOpt;
 
