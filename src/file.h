@@ -28,14 +28,17 @@ class FileInfo {
 
         std::unordered_map<std::string, std::vector<int>> betaIntColumn;
         std::unordered_map<std::string, std::vector<int>> betaIntColumn2;
+        std::unordered_map<std::string, std::vector<int>> betaIntColumn3;
         std::unordered_map<std::string, std::vector<int>> mb_covIntColumn;
         std::unordered_map<std::string, std::vector<int>> mb_covIntColumn2;
+        std::unordered_map<std::string, std::vector<int>> mb_covIntColumn3;
         std::unordered_map<std::string, std::vector<int>> rb_covIntColumn;      
-        std::unordered_map<std::string, std::vector<int>> rb_covIntColumn2; 
+        std::unordered_map<std::string, std::vector<int>> rb_covIntColumn2;
+        std::unordered_map<std::string, std::vector<int>> rb_covIntColumn3;
 };
 
-void processFileHeader(int nInt1, int nInt2, bool mb, bool rb, bool additionalTest, std::vector<std::string> lc_intNames, std::vector<std::string> lc_intNames2, std::vector<std::string> fileNames, FileInfo* fip);
-void printOutputHeader(bool mb, bool rb, bool additionalTest, std::string output, std::string output2, size_t nInt1, size_t nInt2, std::vector<std::string> intNames, std::vector<std::string> intNames2); 
+void processFileHeader(int nInt1, int nInt2, int nint3, bool mb, bool rb, bool additionalJoint, bool additionalInteraction, std::vector<std::string> lc_intNames, std::vector<std::string> lc_intNames2, std::vector<std::string> lc_intNames3, std::vector<std::string> fileNames, FileInfo* fip);
+void printOutputHeader(bool mb, bool rb, bool additionalJoint, bool additionalInteraction std::string output, std::string output2, std::string output3, size_t nInt1, size_t nInt2, size_t nInt3, std::vector<std::string> intNames, std::vector<std::string> intNames2, std::vector<std::string> intNames3); 
 void printHeaderMissingError(std::string fileName, std::string column);
 
 #endif
