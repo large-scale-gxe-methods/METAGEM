@@ -182,7 +182,7 @@ void CommandLine::processCommandLine(int argc, char* argv[]) {
               cerr << "\nERROR: There are duplicate exposure names in the additional joint test.\n\n";
               exit(1);
           }
-          nInt2 = intNames2.size();
+          nInt2 = intNames2.size() + 1;
           
           lcIntNames2 = intNames2;
           for(std::string &s : lcIntNames2){
