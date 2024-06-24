@@ -524,7 +524,7 @@ void metagem(CommandLine cmd)
                     int vi = index * (nInt3 * nInt3);
     
                     // Betas
-                    std::vector<double> fileBetaInt3(nInt2);
+                    std::vector<double> fileBetaInt3(nInt3);
                     for (size_t i = 0; i < nInt3; i++) {
                         fileBetaInt3[i] = std::stod(values[betaIntColumn3[i]]) * dir;
                     }
@@ -636,14 +636,12 @@ void metagem(CommandLine cmd)
     std::vector<double> StempGE3(nInt3, 0.0);
     std::vector<double> betaInt3(nInt3, 0.0);
     boost::math::chi_squared chisq_dist_M(1);
-    std::vector<std::string> intNames2 = cmd.intNames2;
-    std::vector<std::string> intNames2 = cmd.intNames3;
     boost::math::chi_squared chisq_dist_Int(nInt);
     boost::math::chi_squared chisq_dist_Joint(nInt1);
     boost::math::chi_squared chisq_dist_Int2(nInt2);
     boost::math::chi_squared chisq_dist_Joint2(nInt2);
-    boost::math::chi_squared chisq_dist_Int2(nInt3);
-    boost::math::chi_squared chisq_dist_Joint2(nInt3);
+    boost::math::chi_squared chisq_dist_Int3(nInt3);
+    boost::math::chi_squared chisq_dist_Joint3(nInt3);
 
     printMetaBegin(nFiles, nvars);
     for (int i = 0; i < nvars; i++)
