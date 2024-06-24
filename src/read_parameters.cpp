@@ -179,7 +179,7 @@ void CommandLine::processCommandLine(int argc, char* argv[]) {
           outFile2 = additionalJointInfo.back();
           std::set<std::string> s(intNames2.begin(), intNames2.end());
           if (s.size() != intNames2.size()) {
-              cerr << "\nERROR: There are duplicate variable names in the additional joint test.\n\n";
+              cerr << "\nERROR: There are duplicate exposure names in the additional joint test.\n\n";
               exit(1);
           }
           nInt2 = intNames2.size();
@@ -189,6 +189,7 @@ void CommandLine::processCommandLine(int argc, char* argv[]) {
               std::transform(s.begin(), s.end(), s.begin(), [](char c){ return std::tolower(c); });
               s = "g-" + s;
           }
+          lcIntNames2.insert(lcIntNames2.begin(), "g");
 
           // Additional output file
           std::ofstream results2(outFile2);
@@ -218,7 +219,7 @@ void CommandLine::processCommandLine(int argc, char* argv[]) {
           }
         }
 
-      // Additional interaction test
+        // Additional interaction test
         if (!additionalInteractionInfo.empty()) {
           additionalInteraction = true;
           
@@ -240,7 +241,7 @@ void CommandLine::processCommandLine(int argc, char* argv[]) {
           outFile3 = additionalInteractionInfo.back();
           std::set<std::string> s(intNames3.begin(), intNames3.end());
           if (s.size() != intNames3.size()) {
-              cerr << "\nERROR: There are duplicate variable names in the additional interaction-only test.\n\n";
+              cerr << "\nERROR: There are duplicate exposure names in the additional interaction-only test.\n\n";
               exit(1);
           }
           nInt3 = intNames3.size();
