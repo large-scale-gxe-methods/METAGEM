@@ -1065,12 +1065,12 @@ void metagem(CommandLine cmd)
     delete[] Ai3;
     
     printDone(2);
-    printOutputLocation(cmd.outFile);
+    printOutputLocation1(cmd.outFile);
     if(additionalJoint){
-        printOutputLocation(cmd.outFile2);
+        printOutputLocation2(cmd.outFile2);
     }
     if(additionalInteraction){
-        printOutputLocation(cmd.outFile3);
+        printOutputLocation3(cmd.outFile3);
     }
 }
 
@@ -1105,8 +1105,16 @@ void printDone(int nbs) {
   }
 }
 
-void printOutputLocation(std::string outFile) {
-  cout << "Results are in [" << outFile << "].";
+void printOutputLocation1(std::string outFile) {
+  cout << "Results are in [" << outFile << "].\n";
+}
+
+void printOutputLocation2(std::string outFile) {
+  cout << "Additional joint test results are in [" << outFile << "].\n";
+}
+
+void printOutputLocation3(std::string outFile) {
+  cout << "Additional interaction-only test results are in [" << outFile << "].\n";
 }
 
 void printZeroVariantsError(std::string fileName) {
