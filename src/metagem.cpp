@@ -623,16 +623,14 @@ void metagem(CommandLine cmd)
     double* Ai = new double[nInt1 * nInt1];
     double* VE = new double[nInt * nInt];
     double* Ai2 = new double[nInt2 * nInt2];
-    double* VE2 = nullptr;
+    double* VE2 = new double[(nInt2-1) * (nInt2-1)];
     double* Ai3 = new double[nInt3 * nInt3];
-    double* VE3 = nullptr;
     std::vector<double> StempE(nInt, 0.0);
     std::vector<double> StempGE(nInt1, 0.0);
     std::vector<double> betaInt(nInt1, 0.0);
-    std::vector<double> StempE2;
+    std::vector<double> StempE2(nInt2-1, 0.0);
     std::vector<double> StempGE2(nInt2, 0.0);
     std::vector<double> betaInt2(nInt2, 0.0);
-    std::vector<double> StempE3;
     std::vector<double> StempGE3(nInt3, 0.0);
     std::vector<double> betaInt3(nInt3, 0.0);
     boost::math::chi_squared chisq_dist_M(1);
@@ -809,7 +807,7 @@ void metagem(CommandLine cmd)
             {
                 subMatrix(&mb_V2[0], Ai2, nInt2, nInt2, nInt2, nInt2, iss);
                 subMatInv(&mb_V2[0], nInt2, iss);
-    
+                subMatrix(&mb_V2[0], VE2, nInt2-1, nInt2-1, nInt2, nInt2-1, iss + nInt2 + 1);
     
                 // Interaction effects
                 for (size_t j = 0; j < nInt2; j++) {
@@ -818,7 +816,19 @@ void metagem(CommandLine cmd)
                     }
                 }
     
-                 
+                // Int P-value
+                matInv(VE2, nInt2-1);
+                for (size_t j = 0; j < (nInt2 - 1); j++) {
+                    for (size_t k = 0; k < (nInt2 - 1); k++) {
+                        StempE2[j] += (VE2[((nInt2 - 1) * j) + k] * betaInt2[k + 1]);
+                    }
+                }
+            
+                statInt = 0.0;
+                for (size_t j = 1; j < nInt2; j++) 
+                    statInt += betaInt2[j] * StempE2[j-1];
+                pvalInt = (std::isnan(statInt) || statInt <= 0.0) ? NAN : boost::math::cdf(complement(chisq_dist_Int2, statInt));
+    
     
                 // Joint P-value
                 for (size_t j = 0; j < nInt2; j++) {
@@ -832,23 +842,6 @@ void metagem(CommandLine cmd)
                     statJoint += betaInt2[k] * StempGE2[k];
                 pvalJoint = (std::isnan(statJoint) || statJoint <= 0.0) ? NAN : boost::math::cdf(complement(chisq_dist_Joint2, statJoint));
                 
-                // Int P-value
-                double* VE2 = new double[(nInt2-1) * (nInt2-1)];
-                StempE2.resize(nInt2-1, 0.0);
-                chisq_dist_Int2 = boost::math::chi_squared(nInt2-1);
-                subMatrix(&mb_V2[0], VE2, nInt2-1, nInt2-1, nInt2, nInt2-1, iss + nInt2 + 1);
-                matInv(VE2, nInt2-1);
-                for (size_t j = 0; j < (nInt2-1); j++) {
-                    for (size_t k = 0; k < (nInt2-1); k++) {
-                        StempE2[j] += (VE2[((nInt2-1) * j) + k] * betaInt2[k + 1]);
-                    }
-                }
-
-                statInt = 0.0;
-                for (size_t j = 1; j < nInt2; j++) 
-                    statInt += betaInt2[j] * StempE2[j-1];
-                pvalInt = (std::isnan(statInt) || statInt <= 0.0) ? NAN : boost::math::cdf(complement(chisq_dist_Int2, statInt));
-                std::fill(StempE2.begin(), StempE2.end(), 0.0);
   
                 
                 // Print
@@ -876,7 +869,7 @@ void metagem(CommandLine cmd)
             {
                 subMatrix(&rb_V2[0], Ai2, nInt2, nInt2, nInt2, nInt2, iss);
                 subMatInv(&rb_V2[0], nInt2, iss);
-    
+                subMatrix(&rb_V2[0], VE2, nInt2-1, nInt2-1, nInt2, nInt2-1, iss + nInt2 + 1);
     
                 // Interaction effects
                 for (size_t j = 0; j < nInt2; j++) {
@@ -885,6 +878,18 @@ void metagem(CommandLine cmd)
                     }
                 }
     
+                // Int P-value
+                matInv(VE2, nInt2-1);
+                for (size_t j = 0; j < (nInt2 - 1); j++) {
+                    for (size_t k = 0; k < (nInt2 - 1); k++) {
+                        StempE2[j] += (VE2[((nInt2 - 1) * j) + k] * betaInt2[k + 1]);
+                    }
+                }
+            
+                statInt = 0.0;
+                for (size_t j = 1; j < nInt2; j++) 
+                    statInt += betaInt2[j] * StempE2[j-1];
+                pvalInt = (std::isnan(statInt) || statInt <= 0.0) ? NAN : boost::math::cdf(complement(chisq_dist_Int2, statInt));
     
                 // Joint P-value
                 for (size_t j = 0; j < nInt2; j++) {
@@ -897,24 +902,7 @@ void metagem(CommandLine cmd)
                 for (size_t k = 0; k < nInt2; k++)
                     statJoint += betaInt2[k] * StempGE2[k];
                 pvalJoint = (std::isnan(statJoint) || statJoint <= 0.0) ? NAN : boost::math::cdf(complement(chisq_dist_Joint2, statJoint));
-    
-                // Int P-value
-                double* VE2 = new double[(nInt2-1) * (nInt2-1)];
-                StempE2.resize(nInt2-1, 0.0);
-                chisq_dist_Int2 = boost::math::chi_squared(nInt2-1);
-                subMatrix(&rb_V[0], VE2, nInt2-1, nInt2-1, nInt2, nInt2-1, iss + nInt2 + 1);
-                matInv(VE2, nInt2-1);
-                for (size_t j = 0; j < (nInt2-1); j++) {
-                        for (size_t k = 0; k < (nInt2-1); k++) {
-                            StempE2[j] += (VE2[((nInt2-1) * j) + k] * betaInt2[k + 1]);
-                        }
-                }
-        
-                statInt = 0.0;
-                for (size_t j = 1; j < nInt2; j++) 
-                    statInt += betaInt2[j] * StempE2[j-1];
-                pvalInt = (std::isnan(statInt) || statInt <= 0.0) ? NAN : boost::math::cdf(complement(chisq_dist_Int2, statInt));
-                std::fill(StempE2.begin(), StempE2.end(), 0.0);
+
                 
                 // Print
                 for (size_t j = 0; j < nInt2; j++) {
@@ -1079,7 +1067,6 @@ void metagem(CommandLine cmd)
     delete[] VE2;
 
     delete[] Ai3;
-    delete[] VE3;
     
     printDone(2);
     printOutputLocation(cmd.outFile);
