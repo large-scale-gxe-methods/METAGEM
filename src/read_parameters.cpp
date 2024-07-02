@@ -302,7 +302,7 @@ void print_help() {
         << "   --exposure-names \t The names of the exposure(s) to be included in the meta-analysis." << endl
         << "   --out \t\t Full path and extension to where METAGEM output results. \n \t\t\t    Default: metagem.out" << endl
         << "   --meta-option \t Integer value indicating which summary statistics should be used for meta-analysis. \n\t\t\t    0: Both model-based and robust summary statistics. \n \t\t\t    1: model-based summary statistics. \n \t\t\t    2: robust summary statistics. \n \t\t\t    Default: 0" << endl
-        << "   --additional-joint \t The variable names and the full path of the output file for one additional joint test." << endl;
+        << "   --additional-joint \t The variable names and the full path of the output file for one additional joint test." << endl
         << "   --additional-interaction \t The variable names and the full path of the output file for one additional interation-only test." << endl;
     cout << endl << endl;
     cout << endl << endl;
