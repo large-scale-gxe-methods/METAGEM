@@ -295,7 +295,7 @@ void metagem(CommandLine cmd)
     
                     // Betas
                     std::vector<double> fileBetaInt3(nInt3);
-                    for (size_t i = 0; i < nInt2; i++) {
+                    for (size_t i = 0; i < nInt3; i++) {
                         fileBetaInt3[i] = std::stod(values[betaIntColumn3[i]]);
                     }
     
