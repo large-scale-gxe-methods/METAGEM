@@ -631,11 +631,9 @@ void printOutputHeader(bool mb, bool rb, bool additionalJoint, bool additionalIn
 
     if(additionalJoint){
         for(std::string &s : intNames2){
-            if (s != "G") {
-                s = "G-" + s;
-              }
+            s = "G-" + s;
         }
-
+        intNames2.insert(intNames2.begin(), "G");
 
         std::ofstream results2(output2, std::ofstream::binary);
 
@@ -700,9 +698,7 @@ void printOutputHeader(bool mb, bool rb, bool additionalJoint, bool additionalIn
     
     if(additionalInteraction){
         for(std::string &s : intNames3){
-            if (s != "G") {
-                s = "G-" + s;
-              }
+            s = "G-" + s;
         }
 
 
