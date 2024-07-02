@@ -631,15 +631,14 @@ void metagem(CommandLine cmd)
     std::vector<double> StempE2(nInt2-1, 0.0);
     std::vector<double> StempGE2(nInt2, 0.0);
     std::vector<double> betaInt2(nInt2, 0.0);
-    std::vector<double> StempGE3(nInt3, 0.0);
+    std::vector<double> StempE3(nInt3, 0.0);
     std::vector<double> betaInt3(nInt3, 0.0);
     boost::math::chi_squared chisq_dist_M(1);
     boost::math::chi_squared chisq_dist_Int(nInt);
     boost::math::chi_squared chisq_dist_Joint(nInt1);
-    boost::math::chi_squared chisq_dist_Int2(nInt2);
+    boost::math::chi_squared chisq_dist_Int2(nInt2-1);
     boost::math::chi_squared chisq_dist_Joint2(nInt2);
     boost::math::chi_squared chisq_dist_Int3(nInt3);
-    boost::math::chi_squared chisq_dist_Joint3(nInt3);
 
     printMetaBegin(nFiles, nvars);
     for (int i = 0; i < nvars; i++)
@@ -860,7 +859,7 @@ void metagem(CommandLine cmd)
                 }
                 oss2 << pvalInt << "\t" << pvalJoint << ((rb) ? "\t" : "\n");
                 
-    
+                std::fill(StempE2.begin(), StempE2.end(), 0.0);
                 std::fill(StempGE2.begin(), StempGE2.end(), 0.0);
                 std::fill(betaInt2.begin(), betaInt2.end(), 0.0);
             }
@@ -919,7 +918,8 @@ void metagem(CommandLine cmd)
                     }
                 }
                 oss2 << pvalInt << "\t" << pvalJoint << "\n";
-    
+
+                std::fill(StempE2.begin(), StempE2.end(), 0.0);
                 std::fill(StempGE2.begin(), StempGE2.end(), 0.0);
                 std::fill(betaInt2.begin(), betaInt2.end(), 0.0);
             }
@@ -951,19 +951,17 @@ void metagem(CommandLine cmd)
     
                  
     
-                // Joint P-value
+                // Int P-value
                 for (size_t j = 0; j < nInt3; j++) {
                     for (size_t k = 0; k < nInt3; k++) {
-                        StempGE3[j] += (Ai3[(nInt3 * j) + k] * betaInt3[k]);
+                        StempE3[j] += (Ai3[(nInt3 * j) + k] * betaInt3[k]);
                     }
                 }
 
-                statJoint = 0.0;
+                statInt = 0.0;
                 for (size_t k = 0; k < nInt3; k++)
-                    statJoint += betaInt3[k] * StempGE3[k];
-                pvalJoint = (std::isnan(statJoint) || statJoint <= 0.0) ? NAN : boost::math::cdf(complement(chisq_dist_Joint3, statJoint));
-                
-                pvalInt = pvalJoint;
+                    statInt += betaInt3[k] * StempE3[k];
+                pvalInt = (std::isnan(statInt) || statInt <= 0.0) ? NAN : boost::math::cdf(complement(chisq_dist_Int3, statInt));
   
                 
                 // Print
@@ -983,7 +981,7 @@ void metagem(CommandLine cmd)
                 
                 oss3 << pvalInt << ((rb) ? "\t" : "\n"); 
     
-                std::fill(StempGE3.begin(), StempGE3.end(), 0.0);
+                std::fill(StempE3.begin(), StempE3.end(), 0.0);
                 std::fill(betaInt3.begin(), betaInt3.end(), 0.0);
             }
     
@@ -1001,19 +999,18 @@ void metagem(CommandLine cmd)
                 }
     
     
-                // Joint P-value
+                // Int P-value
                 for (size_t j = 0; j < nInt3; j++) {
                     for (size_t k = 0; k < nInt3; k++) {
-                        StempGE3[j] += (Ai3[(nInt3 * j) + k] * betaInt3[k]);
+                        StempE3[j] += (Ai3[(nInt3 * j) + k] * betaInt3[k]);
                     }
                 }
     
-                statJoint = 0.0;
+                statInt = 0.0;
                 for (size_t k = 0; k < nInt3; k++)
-                    statJoint += betaInt3[k] * StempGE3[k];
-                pvalJoint = (std::isnan(statJoint) || statJoint <= 0.0) ? NAN : boost::math::cdf(complement(chisq_dist_Joint3, statJoint));
-    
-                pvalInt = pvalJoint;
+                    statInt += betaInt3[k] * StempE3[k];
+                pvalInt = (std::isnan(statInt) || statInt <= 0.0) ? NAN : boost::math::cdf(complement(chisq_dist_Int3, statInt));
+
                 
                 // Print
                 for (size_t j = 0; j < nInt3; j++) {
@@ -1031,7 +1028,7 @@ void metagem(CommandLine cmd)
                 }
                 oss3 << pvalInt << "\n";
     
-                std::fill(StempGE3.begin(), StempGE3.end(), 0.0);
+                std::fill(StempE3.begin(), StempE3.end(), 0.0);
                 std::fill(betaInt3.begin(), betaInt3.end(), 0.0);
             }
     
