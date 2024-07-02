@@ -1030,7 +1030,6 @@ void metagem(CommandLine cmd)
                     }
                 }
                 oss3 << pvalInt << "\n";
-                }
     
                 std::fill(StempGE3.begin(), StempGE3.end(), 0.0);
                 std::fill(betaInt3.begin(), betaInt3.end(), 0.0);
