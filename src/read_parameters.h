@@ -33,6 +33,7 @@ public:
     bool rb = false;
     bool additionalJoint = false;
     bool additionalInteraction = false;
+    bool renameHeaders = false;
     void processCommandLine(int argc, char* argv[]);
 };
 
