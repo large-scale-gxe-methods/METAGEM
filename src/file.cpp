@@ -3,7 +3,7 @@
 void processFileHeader(int nInt1, int nInt2, int nInt3, bool mb, bool rb, bool additionalJoint, bool additionalInteraction,bool renameHeaders, std::vector<std::string> lc_intNames, std::vector<std::string> lc_intNames2, std::vector<std::string> lc_intNames3, std::vector<std::string> fileNames, std::vector<std::string> fileHeaderPath, FileInfo* fip) 
 {
     if(renameHeaders = true){
-        headerRenamings = loadHeaderRenaming(fileHeaderPath, fileNames);
+        auto headerRenamings = loadHeaderRenaming(fileHeaderPath, fileNames);
     }
     
     for (size_t f = 0; f < fileNames.size(); f++) {
