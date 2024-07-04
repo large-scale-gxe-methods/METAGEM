@@ -22,6 +22,7 @@ public:
     std::string outFile2;
     std::string outFile3;
     std::string metaFileList;
+    std::string fileHeaderPath;
 
     size_t nInt;
     size_t nInt2 = 1;
