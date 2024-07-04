@@ -281,19 +281,10 @@ void CommandLine::processCommandLine(int argc, char* argv[]) {
           }
         }
 
-        // Header-rename files
-        size_t fhs = fileHeaderPath.size();
-        if (fhs = 1) {
+        // Header-rename file
+        size_t fhl = fileHeaderPath.length();
+        if (fhl > 0) {
           renameHeaders = true;
-          std::ifstream testfile;
-          testfile.open(fileHeaderPath);
-          if (!testfile.is_open()) {
-              cerr << "\nERROR: Cannot open the file: [" << fileHeaderPath << "].\n\n";
-              exit(1);
-          }
-        } else if (fhs > 1) {
-            cerr << "\nERROR: More than one header-rename file.\n\n";
-            exit(1);
         }
         
     }
