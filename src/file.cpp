@@ -1,7 +1,11 @@
 #include "metagem.h"
 
-void processFileHeader(int nInt1, int nInt2, int nInt3, bool mb, bool rb, bool additionalJoint, bool additionalInteraction,std::vector<std::string> lc_intNames, std::vector<std::string> lc_intNames2, std::vector<std::string> lc_intNames3, std::vector<std::string> fileNames, FileInfo* fip) 
+void processFileHeader(int nInt1, int nInt2, int nInt3, bool mb, bool rb, bool additionalJoint, bool additionalInteraction,bool renameHeaders, std::vector<std::string> lc_intNames, std::vector<std::string> lc_intNames2, std::vector<std::string> lc_intNames3, std::vector<std::string> fileNames, std::vector<std::string> fileHeaderPath, FileInfo* fip) 
 {
+    if(renameHeaders = true){
+        headerRenamings = loadHeaderRenaming(fileHeaderPath, fileNames);
+    }
+    
     for (size_t f = 0; f < fileNames.size(); f++) {
 
         std::string fileName = fileNames[f];
@@ -44,6 +48,26 @@ void processFileHeader(int nInt1, int nInt2, int nInt3, bool mb, bool rb, bool a
             header_i++;
         }
         fip->nheader[fileName] = header_i;
+
+        
+        // Check if there are header renamings for this file
+        if(renameHeaders = true){
+            if (headerRenamings.find(fileName) != headerRenamings.end()) {
+            // Apply header name changes
+            const auto& mappings = headerRenamings[fileName];
+                for (const auto& mapping : mappings) {
+                    if (columnNames.find(mapping.first) != columnNames.end()) {
+                        int colIndex = columnNames[mapping.first];
+                        columnNames.erase(mapping.first);
+                        columnNames[mapping.second] = colIndex;
+                    } else {
+                        std::cerr << "ERROR: Column '" << mapping.first << "' not found in file '" << fileName << "' for renaming to '" << mapping.second << "'.\n";
+                        exit(1);
+                    }
+                }
+            }
+        }
+        
 
         // Get variant information columns
         int snpid_col = 0;
@@ -771,7 +795,7 @@ void printHeaderMissingError(std::string fileName, std::string column) {
 }
 
 
-void loadColumnMappings(std::string titlesPath, std::vector<std::string> fileNames) {
+void loadHeaderRenaming(std::string fileHeaderPath, std::vector<std::string> fileNames) {
     std::map<std::string, std::map<std::string, std::string>> fileColumnMappings;
     std::ifstream titlesFile(fileHeaderPath);
     if (!fileHeaderPath.is_open()) {
