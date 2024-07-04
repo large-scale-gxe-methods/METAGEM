@@ -23,6 +23,7 @@ void CommandLine::processCommandLine(int argc, char* argv[]) {
     app.add_option("--meta-option", metaOpt_in, "");
     app.add_option("--additional-joint", additionalJointInfo, "") -> expected(0, 100);
     app.add_option("--additional-interaction", additionalInteractionInfo, "") -> expected(0, 100);
+    app.add_option("--header-rename-file", fileNames, "")->expected(1);
   
     try
     {
