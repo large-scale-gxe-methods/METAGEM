@@ -771,3 +771,50 @@ void printHeaderMissingError(std::string fileName, std::string column) {
 }
 
 
+void loadColumnMappings(std::string titlesPath, std::vector<std::string> fileNames) {
+    std::map<std::string, std::map<std::string, std::string>> fileColumnMappings;
+    std::ifstream titlesFile(fileHeaderPath);
+    if (!fileHeaderPath.is_open()) {
+        std::cerr << "ERROR: Unable to open the header-rename file: " << fileHeaderPath << std::endl;
+        exit(1);
+    }
+
+    // Convert the list of fileNames to a set for quick lookup
+    std::unordered_set<std::string> fileSet(fileNames.begin(), fileNames.end());
+
+    std::string line, currentFile;
+    while (getline(titlesFile, line)) {
+        std::string trimmedLine = line;
+        // Remove leading and trailing whitespaces
+        trimmedLine.erase(trimmedLine.begin(), std::find_if(trimmedLine.begin(), trimmedLine.end(), [](unsigned char ch) { return !std::isspace(ch); }));
+        trimmedLine.erase(std::find_if(trimmedLine.rbegin(), trimmedLine.rend(), [](unsigned char ch) { return !std::isspace(ch); }).base(), trimmedLine.end());
+
+        // Skip empty lines
+        if (trimmedLine.empty()) continue;  
+
+        if (fileSet.find(trimmedLine) != fileSet.end()) {
+            currentFile = trimmedLine;
+        } else {
+            if (currentFile.empty()) {
+                std::cerr << "ERROR: No valid filename found for mapping: " << line << std::endl;
+                exit(1);
+            }
+
+            std::istringstream iss(line);
+            std::string newName, oldName, extraCheck;
+            if (iss >> newName >> oldName) {
+                if (iss >> extraCheck) {
+                    std::cerr << "ERROR: Line contains more than two elements: " << line << std::endl;
+                    exit(1);
+                } else {
+                    fileColumnMappings[currentFile][oldName] = newName;
+                }
+            } else {
+                std::cerr << "ERROR: The line is neither a file name nor a pair of header names: " << line << std::endl;
+                exit(1);
+            }
+        }
+    }
+    titlesFile.close();
+    return fileColumnMappings;
+}
