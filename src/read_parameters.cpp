@@ -23,7 +23,7 @@ void CommandLine::processCommandLine(int argc, char* argv[]) {
     app.add_option("--meta-option", metaOpt_in, "");
     app.add_option("--additional-joint", additionalJointInfo, "") -> expected(0, 100);
     app.add_option("--additional-interaction", additionalInteractionInfo, "") -> expected(0, 100);
-    app.add_option("--header-rename-file", fileNames, "")->expected(1);
+    app.add_option("--header-rename-file", fileHeaderPath, "")->expected(1);
   
     try
     {
@@ -280,6 +280,22 @@ void CommandLine::processCommandLine(int argc, char* argv[]) {
               exit(1);
           }
         }
+
+        // Header-rename files
+        size_t fhs = fileHeaderPath.size();
+        if (fhs = 1) {
+          renameHeaders = true;
+          std::ifstream testfile;
+          testfile.open(fileHeaderPath);
+          if (!testfile.is_open()) {
+              cerr << "\nERROR: Cannot open the file: [" << fileHeaderPath << "].\n\n";
+              exit(1);
+          }
+        } else if (fhs > 1) {
+            cerr << "\nERROR: More than one header-rename file.\n\n";
+            exit(1);
+        }
+        
     }
     catch( const CLI::CallForHelp &e )
     {
