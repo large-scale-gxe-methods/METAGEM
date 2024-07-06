@@ -5,6 +5,7 @@
 #include <fstream>
 #include <chrono>
 #include <unordered_map>
+#include <unordered_set>
 
 #include <boost/math/distributions/chi_squared.hpp>
 
