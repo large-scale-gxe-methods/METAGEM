@@ -804,6 +804,9 @@ std::map<std::string, std::map<std::string, std::string>> loadHeaderRenaming(std
         exit(1);
     }
 
+    // Convert the list of fileNames to a set for quick lookup
+    std::unordered_set<std::string> fileSet(fileNames.begin(), fileNames.end());
+
     std::string line, currentFile;
     while (getline(titlesFile, line)) {
         std::string trimmedLine = line;
@@ -814,7 +817,7 @@ std::map<std::string, std::map<std::string, std::string>> loadHeaderRenaming(std
         // Skip empty lines
         if (trimmedLine.empty()) continue;  
 
-        if (fileNames.find(trimmedLine) != fileNames.end()) {
+        if (fileSet.find(trimmedLine) != fileSet.end()) {
             currentFile = trimmedLine;
         } else {
             if (currentFile.empty()) {
