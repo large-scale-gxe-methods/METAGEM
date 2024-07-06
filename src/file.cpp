@@ -795,7 +795,7 @@ void printHeaderMissingError(std::string fileName, std::string column) {
 }
 
 
-void loadHeaderRenaming(std::string fileHeaderPath, std::vector<std::string> fileNames) {
+std::map<std::string, std::map<std::string, std::string>> loadHeaderRenaming(std::string fileHeaderPath, std::vector<std::string> fileNames) {
     std::map<std::string, std::map<std::string, std::string>> fileColumnMappings;
     std::ifstream titlesFile(fileHeaderPath);
     if (!fileHeaderPath.is_open()) {
