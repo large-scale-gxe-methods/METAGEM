@@ -2,7 +2,7 @@
 
 void processFileHeader(int nInt1, int nInt2, int nInt3, bool mb, bool rb, bool additionalJoint, bool additionalInteraction,bool renameHeaders, std::vector<std::string> lc_intNames, std::vector<std::string> lc_intNames2, std::vector<std::string> lc_intNames3, std::vector<std::string> fileNames, std::string fileHeaderPath, FileInfo* fip) 
 {
-    if(renameHeaders = true){
+    if(renameHeaders){
         auto headerRenamings = loadHeaderRenaming(fileHeaderPath, fileNames);
     }
     
@@ -51,7 +51,7 @@ void processFileHeader(int nInt1, int nInt2, int nInt3, bool mb, bool rb, bool a
 
         
         // Check if there are header renamings for this file
-        if(renameHeaders = true){
+        if(renameHeaders){
             if (headerRenamings.find(fileName) != headerRenamings.end()) {
             // Apply header name changes
             const auto& mappings = headerRenamings[fileName];
