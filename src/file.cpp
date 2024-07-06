@@ -821,7 +821,7 @@ std::map<std::string, std::map<std::string, std::string>> loadHeaderRenaming(std
             currentFile = trimmedLine;
         } else {
             if (currentFile.empty()) {
-                std::cerr << "ERROR: No valid filename found for mapping: " << line << std::endl;
+                std::cerr << "ERROR: No valid file path found for header renaming: " << line << std::endl;
                 exit(1);
             }
 
