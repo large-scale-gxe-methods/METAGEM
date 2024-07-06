@@ -799,13 +799,10 @@ void printHeaderMissingError(std::string fileName, std::string column) {
 std::map<std::string, std::map<std::string, std::string>> loadHeaderRenaming(std::string fileHeaderPath, std::vector<std::string> fileNames) {
     std::map<std::string, std::map<std::string, std::string>> fileColumnMappings;
     std::ifstream titlesFile(fileHeaderPath);
-    if (!fileHeaderPath.is_open()) {
+    if (!titlesFile.is_open()) {
         std::cerr << "ERROR: Unable to open the header-rename file: " << fileHeaderPath << std::endl;
         exit(1);
     }
-
-    // Convert the list of fileNames to a set for quick lookup
-    std::unordered_set<std::string> fileSet(fileNames.begin(), fileNames.end());
 
     std::string line, currentFile;
     while (getline(titlesFile, line)) {
@@ -817,7 +814,7 @@ std::map<std::string, std::map<std::string, std::string>> loadHeaderRenaming(std
         // Skip empty lines
         if (trimmedLine.empty()) continue;  
 
-        if (fileSet.find(trimmedLine) != fileSet.end()) {
+        if (fileNames.find(trimmedLine) != fileNames.end()) {
             currentFile = trimmedLine;
         } else {
             if (currentFile.empty()) {
@@ -835,7 +832,7 @@ std::map<std::string, std::map<std::string, std::string>> loadHeaderRenaming(std
                     fileColumnMappings[currentFile][oldName] = newName;
                 }
             } else {
-                std::cerr << "ERROR: The line is neither a file name nor a pair of header names: " << line << std::endl;
+                std::cerr << "ERROR: This line is neither a file name nor a pair of header names: " << line << std::endl;
                 exit(1);
             }
         }
