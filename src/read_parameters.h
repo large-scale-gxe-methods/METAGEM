@@ -39,6 +39,6 @@ public:
     void processCommandLine(int argc, char* argv[]);
 };
 
-std::pair<std::vector<std::string>, std::map<std::string, std::map<std::string, std::string>>> loadHeaderRenaming(std::string controlFilePath)
+std::pair<std::vector<std::string>, std::map<std::string, std::map<std::string, std::string>>> loadHeaderRenaming(std::string controlFilePath);
 
 #endif
