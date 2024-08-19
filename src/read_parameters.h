@@ -17,13 +17,13 @@ public:
     std::vector<std::string> lcIntNames3;
     std::vector<std::string> additionalJointInfo;
     std::vector<std::string> additionalInteractionInfo;
-    std::map<std::string, std::map<std::string, std::string>> fileColumnMappings;
+    std::map<std::string, std::map<std::string, std::string>> headerRenamings;
 
     std::string outFile;
     std::string outFile2;
     std::string outFile3;
     std::string metaFileList;
-    std::string fileHeaderPath;
+    std::string controlFilePath;
 
     size_t nInt;
     size_t nInt2 = 1;
