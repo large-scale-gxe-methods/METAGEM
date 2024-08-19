@@ -40,7 +40,7 @@ void CommandLine::processCommandLine(int argc, char* argv[]) {
               cerr << "\nERROR: Only need to specify file names in the control file when changing file headers.\n\n";
             }
             auto result = loadHeaderRenaming(controlFilePath);
-            filenames = result.first;
+            fileNames = result.first;
             headerRenamings = result.second;
         }
       
