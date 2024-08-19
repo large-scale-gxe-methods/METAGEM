@@ -17,6 +17,7 @@ public:
     std::vector<std::string> lcIntNames3;
     std::vector<std::string> additionalJointInfo;
     std::vector<std::string> additionalInteractionInfo;
+    std::map<std::string, std::map<std::string, std::string>> fileColumnMappings;
 
     std::string outFile;
     std::string outFile2;
