@@ -1106,7 +1106,7 @@ void printDone(int nbs) {
 }
 
 void printOutputLocation1(std::string outFile) {
-  cout << "Results are in [" << outFile << "].\n";
+  cout << "Main test results are in [" << outFile << "].\n";
 }
 
 void printOutputLocation2(std::string outFile) {
