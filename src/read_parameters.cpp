@@ -23,12 +23,27 @@ void CommandLine::processCommandLine(int argc, char* argv[]) {
     app.add_option("--meta-option", metaOpt_in, "");
     app.add_option("--additional-joint", additionalJointInfo, "") -> expected(0, 100);
     app.add_option("--additional-interaction", additionalInteractionInfo, "") -> expected(0, 100);
-    app.add_option("--header-rename-file", fileHeaderPath, "")->expected(1);
+    app.add_option("--control-file", controlFilePath, "")->expected(1);
   
     try
     {
         app.parse( argc, argv);
+      
+        // Header-rename file
+        size_t fhl = controlFilePath.length();
+        if (fhl > 0) {
+          renameHeaders = true;
+        }
 
+        if (renameHeaders) {
+            if (fileNames.size() != 0 && metaFileList.length() != 0){
+              cerr << "\nERROR: Only need to specify file names in the control file when changing file headers.\n\n";
+            }
+            auto result = loadHeaderRenaming(controlFilePath);
+            filenames = result.first;
+            headerRenamings = result.second;
+        }
+      
         // Input files
         size_t fns = fileNames.size();
         size_t fls = metaFileList.length();
@@ -280,12 +295,6 @@ void CommandLine::processCommandLine(int argc, char* argv[]) {
               exit(1);
           }
         }
-
-        // Header-rename file
-        size_t fhl = fileHeaderPath.length();
-        if (fhl > 0) {
-          renameHeaders = true;
-        }
         
     }
     catch( const CLI::CallForHelp &e )
@@ -314,4 +323,46 @@ void print_help() {
         << "   --additional-interaction \t The variable names and the full path of the output file for one additional interation-only test." << endl;
     cout << endl << endl;
     cout << endl << endl;
+}
+
+std::pair<std::vector<std::string>, std::map<std::string, std::map<std::string, std::string>>> loadHeaderRenaming(std::string controlFilePath) {
+    std::map<std::string, std::map<std::string, std::string>> fileColumnMappings;
+    std::vector<std::string> filenames;
+
+    std::ifstream titlesFile(controlFilePath);
+    if (!titlesFile.is_open()) {
+        std::cerr << "ERROR: Unable to open the control file: " << controlFilePath << std::endl;
+        exit(1);
+    }
+
+    std::string line, currentFile;
+    while (getline(titlesFile, line)) {
+        line.erase(line.begin(), std::find_if(line.begin(), line.end(), [](unsigned char ch) { return !std::isspace(ch); }));
+        line.erase(std::find_if(line.rbegin(), line.rend(), [](unsigned char ch) { return !std::isspace(ch); }).base(), line.end());
+
+        if (line.empty()) continue;
+
+        if (line.substr(0, 4) == "FILE") {
+            currentFile = line.substr(5);
+            filenames.push_back(currentFile);
+            continue;
+        }
+
+        if (!currentFile.empty()) {
+            std::istringstream iss(line);
+            std::string newName, oldName;
+            if (iss >> newName >> oldName) {
+                fileColumnMappings[currentFile][oldName] = newName;
+            } else {
+                std::cerr << "ERROR: Invalid header renaming line: " << line << std::endl;
+                exit(1);
+            }
+        } else {
+            std::cerr << "ERROR: Header renaming found before any file declaration: " << line << std::endl;
+            exit(1);
+        }
+    }
+    titlesFile.close();
+
+    return {filenames, fileColumnMappings};
 }
