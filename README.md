@@ -91,7 +91,7 @@ Input/Output File Options:
      The exposure name(s) and the full path of the output file for one additional interaction-only test.
 
    --control-file
-     A no header text file containing file names in seperate lines, and both of the changed column name(s) and the original column name(s) following the line(s) of the file name(s) which need to do column name changing. This file should contain at least two file names.
+     A no header text file containing file names in seperate lines with a 'FILE' in front of the file name in each line, and containing both of the changed column name(s) and the original column name(s) following the line(s) of the file name(s) which need to do column name changing. This file should contain at least two file names.
 ```
 </details>
 
@@ -169,7 +169,7 @@ An additional interaction-only test with only cov1 as exposure can be defined as
 
 <br />
 
-The '--control-file' flag can be used to specify all the input file names, and change the column name(s) of any input file that has different header name(s) with the standard of GEM output file. All the input file names should be specified in different lines of the control file. For each file that need to change any column name, the pairs of the changed column name (i.e. the standard GEM output file header name) and the original column name should be specified in the following lines of the file name, with each pair a line. If this flag is used, then the '--input-files' flag and the '--input-file-list' flag should not be used.  
+The '--control-file' flag can be used to specify all the input file names, and change the column name(s) of any input file that has different header name(s) with the standard of GEM output file. All the input file names should be specified in different lines of the control file with a 'FILE' in front of the file names. For each file that need to change any column name, the pairs of the changed column name (i.e. the standard GEM output file header name) and the original column name should be specified in the following lines of the file name, with each pair a line. If this flag is used, then the '--input-files' flag and the '--input-file-list' flag should not be used.  
 
 <br />
 
