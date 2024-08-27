@@ -84,9 +84,14 @@ Input/Output File Options:
      2: robust summary statistics.                       
      Default: 0
 
-   --additional-test
-     The variable name(s) (may or may not include the genetic main effect G at first) and the full path of the output file for one additional test.
-   
+   --additional-joint
+     The exposure name(s) and the full path of the output file for one additional joint test.
+
+   --additional-interaction
+     The exposure name(s) and the full path of the output file for one additional interaction-only test.
+
+   --control-file
+     A no header text file containing file names in seperate lines, and both of the changed column name(s) and the original column name(s) following the line(s) of the file name(s) which need to do column name changing. This file should contain at least two file names.
 ```
 </details>
 
@@ -149,20 +154,24 @@ The '--meta-option' flag can be used to specify which columns should be included
  
 <br />
 
-The '--additional-test' flag can be used to define an additional test to run. The genetic main effect 'G' may or may not be specified at first, indicating whether the additional test is a joint test or an interaction-only test. Then the name(s) of interaction(s) which will be included in the additional test should be listed. At last, the full path of the output file of the additional test should be specified.
+The '--additional-joint' flag can be used to define an additional joint test to run. The name(s) of the exposure(s) which will be included in the additional joint test should be listed. The full path of the output file of the additional joint test should be specified after the exposure name(s).
 
-For an example situation which has a total of 2 covariates (cov1 and cov2) in the full test, the '--additional-test' flag may be used as:
+The '--additional-interaction' flag can be used to define an additional interaction-only test to run. The name(s) of exposure(s) which will be included in the additional interaction-only test should be listed. The full path of the output file of the additional interaction-only test should be specified after the exposure name(s).
+
+For an example situation which has a total of 2 covariates (cov1 and cov2) in the full test, an additional joint test with only cov1 as exposure can be defined as:
 ```unix
---additional-test G cov1 metagem2.out
+--additional-joint cov1 metagem2.out
 ```
-This is to define an additional joint test with only cov1 as interaction. The flag may also be used as:
+An additional interaction-only test with only cov1 as exposure can be defined as:
 ```unix
 --additional-test cov1 metagem2.out
 ```
-This is to define an additional interaction-only test with only cov1 as interaction.
 
 <br />
 
+The '--control-file' flag can be used to specify all the input file names, and change the column name(s) of the input file(s) that has different header name(s) with the standard of GEM output file. All the input file names should be specified in different lines of the control file. For each file that need to change any column name, the pairs of changed column name(s) (i.e. the standard GEM output file header name(s)) and original column name(s) should be specified in the following lines of the file name, with each pair a line. If this flag is used, then the '--input-files' flag and the '--input-file-list' flag should not be used.  
+
+<br />
 ### Example
 ```unix
 ./METAGEM --input-files file1.out file2.out file3.out --exposure-names cov1 --out metagem.out
