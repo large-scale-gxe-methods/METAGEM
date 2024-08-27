@@ -164,7 +164,7 @@ For an example situation which has a total of 2 covariates (cov1 and cov2) in th
 ```
 An additional interaction-only test with only cov1 as exposure can be defined as:
 ```unix
---additional-test cov1 metagem2.out
+--additional-interaction cov1 metagem2.out
 ```
 
 <br />
@@ -173,12 +173,18 @@ The '--control-file' flag can be used to specify all the input file names, and c
 
 <br />
 
-### Example
+### Example with the main test:
 ```unix
-./METAGEM --input-files file1.out file2.out file3.out --exposure-names cov1 --out metagem.out
+./METAGEM --input-files file1.out file2.out file3.out --exposure-names cov1 cov2 --out metagem.out
 ```
 <br />
+
+### Example with the main test and additional tests:
+```unix
+./METAGEM --input-files file1.out file2.out file3.out --exposure-names cov1 cov2 --out metagem1.out --additional-joint cov1 metagem2.out --additional-interaction cov1 metagem3.out
+```
 <br />
+
 
 ## Contact 
 For comments, suggestions, bug reports and questions, please contact Han Chen (Han.Chen.2@uth.tmc.edu), Alisa Manning (AKMANNING@mgh.harvard.edu), Kenneth Westerman (KEWESTERMAN@mgh.harvard.edu) or Cong Pan (Cong.Pan@uth.tmc.edu). For bug reports, please include an example to reproduce the problem without having to access your confidential data.
