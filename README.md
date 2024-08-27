@@ -169,7 +169,7 @@ An additional interaction-only test with only cov1 as exposure can be defined as
 
 <br />
 
-The '--control-file' flag can be used to specify all the input file names, and change the column name(s) of any input file that has different header name(s) with the standard of GEM output file. All the input file names should be specified in different lines of the control file with a 'FILE' in front of the file names. For each file that need to change any column name, the pairs of the changed column name (i.e. the standard GEM output file header name) and the original column name should be specified in the following lines of the file name, with each pair a line. If this flag is used, then the '--input-files' flag and the '--input-file-list' flag should not be used.  
+The '--control-file' flag can be used to specify all the input file names, and change the column name(s) of any input file that has different header name(s) with the standard GEM output file. All the input file names should be specified in different lines of the control file with a 'FILE' in front of the file names. For each file that need to change any column name, the pairs of the changed column name (i.e. the standard GEM output file header name) and the original column name should be specified in the following lines of the file name, with each pair a line. If this flag is used, then the '--input-files' flag and the '--input-file-list' flag should not be used.  
 
 <br />
 
