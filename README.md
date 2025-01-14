@@ -85,10 +85,10 @@ Input/Output File Options:
      Default: 0
 
    --additional-joint
-     The exposure name(s) and the full path of the output file for one additional joint test.
+     The exposure name(s) and the full path of the output file for one additional joint meta-analysis.
 
    --additional-interaction
-     The exposure name(s) and the full path of the output file for one additional interaction-only test.
+     The exposure name(s) and the full path of the output file for one additional interaction-only meta-analysis.
 
    --control-file
      A no header text file containing file names in seperate lines with a 'FILE' in front of the file name in each line, and containing both of the changed column name(s) and the original column name(s) following the line(s) of the file name(s) which need to do column name changing. This file should contain at least two file names.
@@ -154,15 +154,15 @@ The '--meta-option' flag can be used to specify which columns should be included
  
 <br />
 
-The '--additional-joint' flag can be used to define an additional joint test to run. The name(s) of the exposure(s) which will be included in the additional joint test should be listed. The full path of the output file of the additional joint test should be specified after the exposure name(s).
+The '--additional-joint' flag can be used to define an additional joint meta-analysis. The name(s) of the exposure(s) which will be included in the additional joint meta-analysis should be listed. The full path of the output file of the additional joint meta-analysis should be specified after the exposure name(s).
 
-The '--additional-interaction' flag can be used to define an additional interaction-only test to run. The name(s) of exposure(s) which will be included in the additional interaction-only test should be listed. The full path of the output file of the additional interaction-only test should be specified after the exposure name(s).
+The '--additional-interaction' flag can be used to define an additional interaction-only meta-analysis. The name(s) of exposure(s) which will be included in the additional interaction-only meta-analysis should be listed. The full path of the output file of the additional interaction-only meta-analysis should be specified after the exposure name(s).
 
-For an example situation which has a total of 2 covariates (cov1 and cov2) in the full test, an additional joint test with only cov1 as exposure can be defined as:
+For an example situation which has a total of 2 covariates (cov1 and cov2) in the full meta-analysis, an additional joint meta-analysis with cov1 as exposure can be defined as:
 ```unix
 --additional-joint cov1 metagem2.out
 ```
-An additional interaction-only test with only cov1 as exposure can be defined as:
+An additional interaction-only meta-analysis with cov1 as exposure can be defined as:
 ```unix
 --additional-interaction cov1 metagem2.out
 ```
