@@ -169,9 +169,13 @@ An additional interaction-only meta-analysis with cov1 as exposure can be define
 
 <br />
 
-The '--control-file' flag can be used to specify all the input file names, and change the column name(s) of any input file that has different header name(s) with the standard GEM output file. All the input file names should be specified in different lines of the control file with a 'FILE' in front of the file names. For each file that need to change any column name, the pairs of the changed column name (i.e. the standard GEM output file header name) and the original column name should be specified in the following lines of the file name, with each pair a line. If this flag is used, then the '--input-files' flag and the '--input-file-list' flag should not be used.  
+The --control-file flag can be used to specify all input file names and rename columns in any input file where header names differ from the standard GEM file format. Each input file name should be listed on a separate line in the control file, prefixed by FILE.
 
-An example of a control file containing 3 files, and need to change 2 header names for the first file:
+For any file requiring column name changes, specify the standard GEM header name and the corresponding original column name as pairs in the lines immediately following the file name. Each pair should be written on a separate line.
+
+Note: If you use the --control-file flag, the --input-files and --input-file-list flags must not be used simultaneously.
+
+Below is an example of a control file with three files, where the first file requires two header name changes:
 ```unix
 FILE file1.out
 SNPID ID
