@@ -158,13 +158,13 @@ The '--additional-joint' flag can be used to define an additional joint meta-ana
 
 The '--additional-interaction' flag can be used to define an additional interaction-only meta-analysis. The name(s) of exposure(s) which will be included in the additional interaction-only meta-analysis should be listed. The full path of the output file of the additional interaction-only meta-analysis should be specified after the exposure name(s).
 
-For an example situation which has a total of 2 covariates (cov1 and cov2) in the full meta-analysis, an additional joint meta-analysis with cov1 as exposure can be defined as:
+For an example situation which has a total of 2 covariates (cov1 and cov2) in the main meta-analysis, an additional joint meta-analysis with cov1 as exposure can be defined as:
 ```unix
 --additional-joint cov1 metagem2.out
 ```
 An additional interaction-only meta-analysis with cov1 as exposure can be defined as:
 ```unix
---additional-interaction cov1 metagem2.out
+--additional-interaction cov1 metagem3.out
 ```
 
 <br />
@@ -182,13 +182,13 @@ FILE file3.out
 
 <br />
 
-### Example with the main test:
+### Example with the main meta-analysis:
 ```unix
 ./METAGEM --input-files file1.out file2.out file3.out --exposure-names cov1 cov2 --out metagem.out
 ```
 <br />
 
-### Example with the main test and additional tests:
+### Example with the main meta-analysis and additional meta-analysis:
 ```unix
 ./METAGEM --input-files file1.out file2.out file3.out --exposure-names cov1 cov2 --out metagem1.out --additional-joint cov1 metagem2.out --additional-interaction cov1 metagem3.out
 ```
