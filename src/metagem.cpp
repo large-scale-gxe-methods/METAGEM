@@ -1106,15 +1106,15 @@ void printDone(int nbs) {
 }
 
 void printOutputLocation1(std::string outFile) {
-  cout << "Main test results are in [" << outFile << "].\n";
+  cout << "Main results are in [" << outFile << "].\n";
 }
 
 void printOutputLocation2(std::string outFile) {
-  cout << "Additional joint test results are in [" << outFile << "].\n";
+  cout << "Additional joint results are in [" << outFile << "].\n";
 }
 
 void printOutputLocation3(std::string outFile) {
-  cout << "Additional interaction-only test results are in [" << outFile << "].\n";
+  cout << "Additional interaction-only results are in [" << outFile << "].\n";
 }
 
 void printZeroVariantsError(std::string fileName) {
