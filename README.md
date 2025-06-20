@@ -175,7 +175,7 @@ For any file requiring column name changes, specify the standard GEM header name
 
 Note: If you use the --control-file flag, the --input-files and --input-file-list flags must not be used simultaneously.
 
-Below is an example of a control file with three files, where the first file requires two header name changes:
+Below is an example of a control file listing three input files, where the first input file requires two header name changes:
 ```unix
 FILE file1.out
 SNPID ID
