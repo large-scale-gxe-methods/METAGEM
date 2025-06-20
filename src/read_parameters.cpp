@@ -178,7 +178,7 @@ void CommandLine::processCommandLine(int argc, char* argv[]) {
           additionalJoint = true;
           
           if (additionalJointInfo.size() == 1) {
-            cerr << "ERROR: Both of the variable name and full path of the additional joint test output file should be specified.\n\n";
+            cerr << "ERROR: Both of the variable name and full path of the additional joint meta-analysis output file should be specified.\n\n";
             exit(1); 
           }
 
@@ -195,7 +195,7 @@ void CommandLine::processCommandLine(int argc, char* argv[]) {
           outFile2 = additionalJointInfo.back();
           std::set<std::string> s(intNames2.begin(), intNames2.end());
           if (s.size() != intNames2.size()) {
-              cerr << "\nERROR: There are duplicate exposure names in the additional joint test.\n\n";
+              cerr << "\nERROR: There are duplicate exposure names in the additional joint meta-analysis.\n\n";
               exit(1);
           }
           nInt2 = intNames2.size() + 1;
@@ -219,18 +219,18 @@ void CommandLine::processCommandLine(int argc, char* argv[]) {
 
           results2 << "test" << endl;
           if (results2.fail()) {
-              cerr << "\nERROR: Cannot write to the additional joint test output file.\n\n";
+              cerr << "\nERROR: Cannot write to the additional joint meta-analysis output file.\n\n";
               results2.close();
             
               if (std::remove(outFile2.c_str()) != 0) {
-                  cerr << "\nERROR: Cannot delete the additional joint test output file.\n\n";
+                  cerr << "\nERROR: Cannot delete the additional joint meta-analysis output file.\n\n";
               }
               exit(1);
           }
           results2.close();
         
           if (std::remove(outFile2.c_str()) != 0) {
-              cerr << "\nERROR: Cannot delete the additional joint test output file.\n\n";
+              cerr << "\nERROR: Cannot delete the additional joint meta-analysis output file.\n\n";
               exit(1);
           }
         }
@@ -240,7 +240,7 @@ void CommandLine::processCommandLine(int argc, char* argv[]) {
           additionalInteraction = true;
           
           if (additionalInteractionInfo.size() == 1) {
-            cerr << "ERROR: Both of the variable name and full path of the additional interaction-only test output file should be specified.\n\n";
+            cerr << "ERROR: Both of the variable name and full path of the additional interaction-only meta-analysis output file should be specified.\n\n";
             exit(1); 
           }
 
@@ -257,7 +257,7 @@ void CommandLine::processCommandLine(int argc, char* argv[]) {
           outFile3 = additionalInteractionInfo.back();
           std::set<std::string> s(intNames3.begin(), intNames3.end());
           if (s.size() != intNames3.size()) {
-              cerr << "\nERROR: There are duplicate exposure names in the additional interaction-only test.\n\n";
+              cerr << "\nERROR: There are duplicate exposure names in the additional interaction-only meta-analysis.\n\n";
               exit(1);
           }
           nInt3 = intNames3.size();
@@ -280,18 +280,18 @@ void CommandLine::processCommandLine(int argc, char* argv[]) {
 
           results3 << "test" << endl;
           if (results3.fail()) {
-              cerr << "\nERROR: Cannot write to the additional interaction-only test output file.\n\n";
+              cerr << "\nERROR: Cannot write to the additional interaction-only meta-analysis output file.\n\n";
               results3.close();
             
               if (std::remove(outFile3.c_str()) != 0) {
-                  cerr << "\nERROR: Cannot delete the additional interaction-only test output file.\n\n";
+                  cerr << "\nERROR: Cannot delete the additional interaction-only meta-analysis output file.\n\n";
               }
               exit(1);
           }
           results3.close();
         
           if (std::remove(outFile3.c_str()) != 0) {
-              cerr << "\nERROR: Cannot delete the additional interaction-only test output file.\n\n";
+              cerr << "\nERROR: Cannot delete the additional interaction-only meta-analysis output file.\n\n";
               exit(1);
           }
         }
@@ -319,8 +319,10 @@ void print_help() {
         << "   --exposure-names \t The names of the exposure(s) to be included in the meta-analysis." << endl
         << "   --out \t\t Full path and extension to where METAGEM output results. \n \t\t\t    Default: metagem.out" << endl
         << "   --meta-option \t Integer value indicating which summary statistics should be used for meta-analysis. \n\t\t\t    0: Both model-based and robust summary statistics. \n \t\t\t    1: model-based summary statistics. \n \t\t\t    2: robust summary statistics. \n \t\t\t    Default: 0" << endl
-        << "   --additional-joint \t The variable names and the full path of the output file for one additional joint test." << endl
-        << "   --additional-interaction \t The variable names and the full path of the output file for one additional interation-only test." << endl;
+        << "   --additional-joint \t The variable names and the full path of the output file for one additional joint meta-analysis." << endl
+        << "   --additional-interaction \t The variable names and the full path of the output file for one additional interaction-only meta-analysis." << endl
+        << "   --control-file \t A no header text file containing file names in seperate lines with a 'FILE' in front of the file name in each line, and containing both of the changed column name(s) and the original column name(s) following the line(s) of the file name(s) which need to do column name changing. This file should contain at least two file names. << endl;
+
     cout << endl << endl;
     cout << endl << endl;
 }
