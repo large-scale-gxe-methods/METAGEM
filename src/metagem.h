@@ -15,7 +15,7 @@
 #include "read_parameters.h"
 #include "file.h"
 
-#define VERSION "1.0"
+#define VERSION "2.0"
 
 using std::cout;
 using std::endl;
