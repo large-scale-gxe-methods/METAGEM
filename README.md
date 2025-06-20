@@ -4,7 +4,7 @@
 METAGEM (META-analysis of GEM summary statistics) is a software program for meta-analysis of large-scale gene-environment interaction testing results, including multi-exposure interactions, joint (main effect and interactions) tests, and marginal tests. It uses results directly from [GEM](https://github.com/large-scale-gxe-methods/GEM) output.
 
 
-Current version: 1.0
+Current version: 2.0
 
 ## Contents 
 - [Dependencies](#dependencies)
@@ -198,9 +198,15 @@ FILE file3.out
 ```
 <br />
 
-
 ## Contact 
-For comments, suggestions, bug reports and questions, please contact Han Chen (Han.Chen.2@uth.tmc.edu), Alisa Manning (AKMANNING@mgh.harvard.edu), Kenneth Westerman (KEWESTERMAN@mgh.harvard.edu) or Cong Pan (Cong.Pan@uth.tmc.edu). For bug reports, please include an example to reproduce the problem without having to access your confidential data.
+For comments, suggestions, bug reports and questions, please contact Han Chen (Han.Chen.2@uth.tmc.edu), Alisa Manning (AKMANNING@mgh.harvard.edu), or Kenneth Westerman (KEWESTERMAN@mgh.harvard.edu). For bug reports, please include an example to reproduce the problem without having to access your confidential data.
+
+<br />
+<br />
+
+## References
+If you use REGEM, please cite
+* Pham DT, Westerman KE, Pan C, Chen L, Srinivasan S, Isganaitis E, Vajravelu ME, Bacha F, Chernausek S, Gubitosi-Klug R, Divers J, Pihoker C, Marcovina SM, Manning AK, Chen H. (2023) Re-analysis and meta-analysis of summary statistics from gene-environment interaction studies. Bioinformatics 39(12):btad730. PubMed PMID: [**38039147**](https://www.ncbi.nlm.nih.gov/pubmed/38039147). PMCID: [**PMC10724851**](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10724851/). DOI: [**10.1093/bioinformatics/btad730**](https://doi.org/10.1093/bioinformatics/btad730).
 
 <br />
 <br />
@@ -209,7 +215,7 @@ For comments, suggestions, bug reports and questions, please contact Han Chen (H
 
  ```
  METAGEM: META-analysis of GEM summary statistics
- Copyright (C) 2021-2023 Duy T. Pham and Han Chen
+ Copyright (C) 2021-2025 Duy T. Pham and Han Chen
  
  This program is free software: you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
