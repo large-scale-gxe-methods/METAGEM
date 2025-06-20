@@ -1110,11 +1110,11 @@ void printOutputLocation1(std::string outFile) {
 }
 
 void printOutputLocation2(std::string outFile) {
-  cout << "Additional joint results are in [" << outFile << "].\n";
+  cout << "Additional joint meta-analysis results are in [" << outFile << "].\n";
 }
 
 void printOutputLocation3(std::string outFile) {
-  cout << "Additional interaction-only results are in [" << outFile << "].\n";
+  cout << "Additional interaction-only meta-analysis results are in [" << outFile << "].\n";
 }
 
 void printZeroVariantsError(std::string fileName) {
