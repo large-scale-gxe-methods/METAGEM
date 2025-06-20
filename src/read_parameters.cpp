@@ -321,7 +321,7 @@ void print_help() {
         << "   --meta-option \t Integer value indicating which summary statistics should be used for meta-analysis. \n\t\t\t    0: Both model-based and robust summary statistics. \n \t\t\t    1: model-based summary statistics. \n \t\t\t    2: robust summary statistics. \n \t\t\t    Default: 0" << endl
         << "   --additional-joint \t The variable names and the full path of the output file for one additional joint meta-analysis." << endl
         << "   --additional-interaction \t The variable names and the full path of the output file for one additional interaction-only meta-analysis." << endl
-        << "   --control-file \t A no header text file containing file names in seperate lines with a 'FILE' in front of the file name in each line, and containing both of the changed column name(s) and the original column name(s) following the line(s) of the file name(s) which need to do column name changing. This file should contain at least two file names. << endl;
+        << "   --control-file \t A no header text file containing file names in seperate lines with a 'FILE' in front of the file name in each line, and containing both of the changed column name(s) and the original column name(s) following the line(s) of the file name(s) which need to do column name changing. This file should contain at least two file names." << endl;
 
     cout << endl << endl;
     cout << endl << endl;
