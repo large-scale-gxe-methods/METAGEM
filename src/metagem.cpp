@@ -1077,7 +1077,7 @@ void metagem(CommandLine cmd)
 void printWelcome() {
     cout << "\n*********************************************************\n";
     cout << "Welcome to METAGEM v" << VERSION << "\n";
-    cout << "(C) 2021-2023 Duy Pham and Han Chen \n";
+    cout << "(C) 2021-2025 Duy Pham and Han Chen \n";
     cout << "GNU General Public License v3\n";
     cout << "*********************************************************\n";
 }
