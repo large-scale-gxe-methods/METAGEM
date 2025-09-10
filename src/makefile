@@ -2,7 +2,7 @@ CXX=g++
 CXXFLAGS = -std=c++11 -O3 -g -Wall
 
 # Uncomment line below for LAPACK/BLAS only and comment other lines beginning with LIBS.
-#LIBS= -llapack -lblas -ldl --lm 
+#LIBS= -llapack -lblas -ldl -lm 
 
 LIBS= -lmkl_gf_lp64 -lmkl_sequential -lmkl_core -ldl -lm 
 
