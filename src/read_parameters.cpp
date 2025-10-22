@@ -21,11 +21,29 @@ void CommandLine::processCommandLine(int argc, char* argv[]) {
     app.add_option("--exposure-names", intNames, "")->expected(1, 1000000)->required();
     app.add_option("--out", outFile_in, "")->expected(1);
     app.add_option("--meta-option", metaOpt_in, "");
-
+    app.add_option("--additional-joint", additionalJointInfo, "") -> expected(0, 100);
+    app.add_option("--additional-interaction", additionalInteractionInfo, "") -> expected(0, 100);
+    app.add_option("--control-file", controlFilePath, "")->expected(1);
+  
     try
     {
         app.parse( argc, argv);
+      
+        // Header-rename file
+        size_t fhl = controlFilePath.length();
+        if (fhl > 0) {
+          renameHeaders = true;
+        }
 
+        if (renameHeaders) {
+            if (fileNames.size() != 0 && metaFileList.length() != 0){
+              cerr << "\nERROR: Only need to specify file names in the control file when changing file headers.\n\n";
+            }
+            auto result = loadHeaderRenaming(controlFilePath);
+            fileNames = result.first;
+            headerRenamings = result.second;
+        }
+      
         // Input files
         size_t fns = fileNames.size();
         size_t fls = metaFileList.length();
@@ -154,6 +172,130 @@ void CommandLine::processCommandLine(int argc, char* argv[]) {
             cerr << "\nERROR: The --meta-option integer value must be 0, 1, or 2.\n\n";
             exit(1);
         }
+
+        // Additional joint test
+        if (!additionalJointInfo.empty()) {
+          additionalJoint = true;
+          
+          if (additionalJointInfo.size() == 1) {
+            cerr << "ERROR: Both of the variable name and full path of the additional joint meta-analysis output file should be specified.\n\n";
+            exit(1); 
+          }
+
+          // Check if the full path of the additional output file specified at the end
+          const std::string& lastTestInfo = additionalJointInfo.back();
+          for (const auto& name : intNames) {
+            if (lastTestInfo == name) {
+              cerr << "ERROR: Please specify the full path of the additional output file at the end of '--additional-joint' flag.\n\n";
+              exit(1);
+            }
+          }
+          
+          intNames2.assign(additionalJointInfo.begin(), additionalJointInfo.end() - 1);
+          outFile2 = additionalJointInfo.back();
+          std::set<std::string> s(intNames2.begin(), intNames2.end());
+          if (s.size() != intNames2.size()) {
+              cerr << "\nERROR: There are duplicate exposure names in the additional joint meta-analysis.\n\n";
+              exit(1);
+          }
+          nInt2 = intNames2.size() + 1;
+          
+          lcIntNames2 = intNames2;
+          for(std::string &s : lcIntNames2){
+              std::transform(s.begin(), s.end(), s.begin(), [](char c){ return std::tolower(c); });
+              s = "g-" + s;
+          }
+          lcIntNames2.insert(lcIntNames2.begin(), "g");
+
+          // Additional output file
+          std::ofstream results2(outFile2);
+          if (!results2) {
+              printOpenFileError(outFile2);
+          }
+
+          if (results2.fail()) {
+              printOpenFileError(outFile2);
+          }
+
+          results2 << "test" << endl;
+          if (results2.fail()) {
+              cerr << "\nERROR: Cannot write to the additional joint meta-analysis output file.\n\n";
+              results2.close();
+            
+              if (std::remove(outFile2.c_str()) != 0) {
+                  cerr << "\nERROR: Cannot delete the additional joint meta-analysis output file.\n\n";
+              }
+              exit(1);
+          }
+          results2.close();
+        
+          if (std::remove(outFile2.c_str()) != 0) {
+              cerr << "\nERROR: Cannot delete the additional joint meta-analysis output file.\n\n";
+              exit(1);
+          }
+        }
+
+        // Additional interaction test
+        if (!additionalInteractionInfo.empty()) {
+          additionalInteraction = true;
+          
+          if (additionalInteractionInfo.size() == 1) {
+            cerr << "ERROR: Both of the variable name and full path of the additional interaction-only meta-analysis output file should be specified.\n\n";
+            exit(1); 
+          }
+
+          // Check if the full path of the additional output file specified at the end
+          const std::string& lastTestInfo = additionalInteractionInfo.back();
+          for (const auto& name : intNames) {
+            if (lastTestInfo == name) {
+              cerr << "ERROR: Please specify the full path of the additional output file at the end of '--additional-interaction' flag.\n\n";
+              exit(1);
+            }
+          }
+          
+          intNames3.assign(additionalInteractionInfo.begin(), additionalInteractionInfo.end() - 1);
+          outFile3 = additionalInteractionInfo.back();
+          std::set<std::string> s(intNames3.begin(), intNames3.end());
+          if (s.size() != intNames3.size()) {
+              cerr << "\nERROR: There are duplicate exposure names in the additional interaction-only meta-analysis.\n\n";
+              exit(1);
+          }
+          nInt3 = intNames3.size();
+          
+          lcIntNames3 = intNames3;
+          for(std::string &s : lcIntNames3){
+              std::transform(s.begin(), s.end(), s.begin(), [](char c){ return std::tolower(c); });
+              s = "g-" + s;
+          }
+
+          // Additional output file
+          std::ofstream results3(outFile3);
+          if (!results3) {
+              printOpenFileError(outFile3);
+          }
+
+          if (results3.fail()) {
+              printOpenFileError(outFile3);
+          }
+
+          results3 << "test" << endl;
+          if (results3.fail()) {
+              cerr << "\nERROR: Cannot write to the additional interaction-only meta-analysis output file.\n\n";
+              results3.close();
+            
+              if (std::remove(outFile3.c_str()) != 0) {
+                  cerr << "\nERROR: Cannot delete the additional interaction-only meta-analysis output file.\n\n";
+              }
+              exit(1);
+          }
+          results3.close();
+        
+          if (std::remove(outFile3.c_str()) != 0) {
+              cerr << "\nERROR: Cannot delete the additional interaction-only meta-analysis output file.\n\n";
+              exit(1);
+          }
+        }
+        
     }
     catch( const CLI::CallForHelp &e )
     {
@@ -176,7 +318,53 @@ void print_help() {
         << "   --input-file-list \t A no header text file containing a single file name per line." << endl
         << "   --exposure-names \t The names of the exposure(s) to be included in the meta-analysis." << endl
         << "   --out \t\t Full path and extension to where METAGEM output results. \n \t\t\t    Default: metagem.out" << endl
-        << "   --meta-option \t Integer value indicating which summary statistics should be used for meta-analysis. \n\t\t\t    0: Both model-based and robust summary statistics. \n \t\t\t    1: model-based summary statistics. \n \t\t\t    2: robust summary statistics. \n \t\t\t    Default: 0" << endl;
+        << "   --meta-option \t Integer value indicating which summary statistics should be used for meta-analysis. \n\t\t\t    0: Both model-based and robust summary statistics. \n \t\t\t    1: model-based summary statistics. \n \t\t\t    2: robust summary statistics. \n \t\t\t    Default: 0" << endl
+        << "   --additional-joint \t The variable names and the full path of the output file for one additional joint meta-analysis." << endl
+        << "   --additional-interaction \t The variable names and the full path of the output file for one additional interaction-only meta-analysis." << endl
+        << "   --control-file \t A no header text file containing file names in seperate lines with a 'FILE' in front of the file name in each line, and containing both of the changed column name(s) and the original column name(s) following the line(s) of the file name(s) which need to do column name changing. This file should contain at least two file names." << endl;
+
     cout << endl << endl;
     cout << endl << endl;
+}
+
+std::pair<std::vector<std::string>, std::map<std::string, std::map<std::string, std::string>>> loadHeaderRenaming(std::string controlFilePath) {
+    std::map<std::string, std::map<std::string, std::string>> fileColumnMappings;
+    std::vector<std::string> filenames;
+
+    std::ifstream titlesFile(controlFilePath);
+    if (!titlesFile.is_open()) {
+        std::cerr << "ERROR: Unable to open the control file: " << controlFilePath << std::endl;
+        exit(1);
+    }
+
+    std::string line, currentFile;
+    while (getline(titlesFile, line)) {
+        line.erase(line.begin(), std::find_if(line.begin(), line.end(), [](unsigned char ch) { return !std::isspace(ch); }));
+        line.erase(std::find_if(line.rbegin(), line.rend(), [](unsigned char ch) { return !std::isspace(ch); }).base(), line.end());
+
+        if (line.empty()) continue;
+
+        if (line.substr(0, 4) == "FILE") {
+            currentFile = line.substr(5);
+            filenames.push_back(currentFile);
+            continue;
+        }
+
+        if (!currentFile.empty()) {
+            std::istringstream iss(line);
+            std::string newName, oldName;
+            if (iss >> newName >> oldName) {
+                fileColumnMappings[currentFile][oldName] = newName;
+            } else {
+                std::cerr << "ERROR: Invalid header renaming line: " << line << std::endl;
+                exit(1);
+            }
+        } else {
+            std::cerr << "ERROR: Header renaming found before any file declaration: " << line << std::endl;
+            exit(1);
+        }
+    }
+    titlesFile.close();
+
+    return {filenames, fileColumnMappings};
 }

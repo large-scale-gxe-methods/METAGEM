@@ -1,5 +1,5 @@
 // <METAGEM: META-analysis of GEM summary statistics>
-// Copyright (C) <2021-2023> Duy T. Pham and Han Chen 
+// Copyright (C) <2021-2025> Duy T. Pham, Han Chen and Shuyi Guo 
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -46,17 +46,23 @@ void metagem(CommandLine cmd)
     // Read the header of each file
     printProcessingFiles();
     FileInfo* fip = new FileInfo();
-    processFileHeader(cmd.nInt + 1, cmd.mb, cmd.rb, cmd.lcIntNames, cmd.fileNames, fip);
+    processFileHeader(cmd.nInt + 1, cmd.nInt2, cmd.nInt3, cmd.mb, cmd.rb, cmd.additionalJoint, cmd.additionalInteraction, cmd.renameHeaders, cmd.lcIntNames, cmd.lcIntNames2, cmd.lcIntNames3, cmd.fileNames, cmd.headerRenamings, fip);
 
     // Initialize objects
     int nvars = 0;
     bool mb = cmd.mb;
     bool rb = cmd.rb;
+    bool additionalJoint = cmd.additionalJoint;
+    bool additionalInteraction = cmd.additionalInteraction;
     size_t nInt   = cmd.nInt;
+    size_t nInt2   = cmd.nInt2;
+    size_t nInt3   = cmd.nInt3;
     size_t nInt1  = nInt + 1; // plus G
     size_t nFiles = cmd.fileNames.size();
 
     int nInt1_sq = nInt1 * nInt1;
+    int nInt2_sq = nInt2 * nInt2;
+    int nInt3_sq = nInt3 * nInt3;
     std::vector<std::string> snpid;
     std::vector<std::string> effectAllele;
     std::vector<std::string> nonEffectAllele;
@@ -72,6 +78,14 @@ void metagem(CommandLine cmd)
     std::vector<double> rb_MV;
     std::vector<double> rb_U;
     std::vector<double> rb_V;
+    std::vector<double> mb_U2;
+    std::vector<double> mb_V2;
+    std::vector<double> rb_U2;
+    std::vector<double> rb_V2;
+    std::vector<double> mb_U3;
+    std::vector<double> mb_V3;
+    std::vector<double> rb_U3;
+    std::vector<double> rb_V3;
     sparse_hash_map<std::pair<std::string, std::string>, int> snpid_idx;
     
     for (size_t f = 0; f < nFiles; f++)
@@ -88,6 +102,8 @@ void metagem(CommandLine cmd)
         int betaMargColumn   = fip->betaMargColumn[fileName];	
         int nheader          = fip->nheader[fileName];
         std::vector<int> betaIntColumn = fip->betaIntColumn[fileName];
+        std::vector<int> betaIntColumn2 = fip->betaIntColumn2[fileName];
+        std::vector<int> betaIntColumn3 = fip->betaIntColumn3[fileName];
 
         // Read input file
         std::ifstream file;
@@ -218,6 +234,111 @@ void metagem(CommandLine cmd)
                     subMatsubVecprod(&rb_V[0], &fileBetaInt[0], &rb_U[0], nInt1, nInt1, vi, 0, ui);
                 }
 
+                // Additional joint test
+                if(additionalJoint){
+                    // Matrix indices
+                    int ui = nvars * nInt2;
+                    int vi = nvars * nInt2_sq;
+    
+                    // Betas
+                    std::vector<double> fileBetaInt2(nInt2);
+                    for (size_t i = 0; i < nInt2; i++) {
+                        fileBetaInt2[i] = std::stod(values[betaIntColumn2[i]]);
+                    }
+    
+                    // Model-based
+                    if (mb)
+                    {
+                        // Interaction
+                        mb_U2.resize(mb_U2.size() + nInt2);
+                        std::vector<int> mb_covIntColumn2 = fip->mb_covIntColumn2[fileName];
+                        for (size_t i = 0; i < nInt2; i++) {
+                            size_t isq = (i * nInt2);
+                            size_t ii  = vi + isq;
+                            for (size_t j = 0; j < nInt2; j++) {
+                                mb_V2.push_back(std::stod(values[mb_covIntColumn2[isq + j]]));
+                            }
+                            mb_V2[ii + i] *= mb_V2[ii + i];
+                        }
+    
+                        // Add to main matrix
+                        subMatInv(&mb_V2[0], nInt2, vi);
+                        subMatsubVecprod(&mb_V2[0], &fileBetaInt2[0], &mb_U2[0], nInt2, nInt2, vi, 0, ui);
+                    }
+    
+                    // Robust
+                    if (rb)
+                    {
+                        // Interaction
+                        rb_U2.resize(rb_U2.size() + nInt2);
+                        std::vector<int> rb_covIntColumn2 = fip->rb_covIntColumn2[fileName];
+                        for (size_t i = 0; i < nInt2; i++) {
+                            size_t isq = (i * nInt2);
+                            size_t ii  = vi + isq;
+                            for (size_t j = 0; j < nInt2; j++) {
+                                rb_V2.push_back(std::stod(values[rb_covIntColumn2[isq + j]]));
+                            }
+                            rb_V2[ii + i] *= rb_V2[ii + i];
+                        }
+    
+                        // Add to main matrix
+                        subMatInv(&rb_V2[0], nInt2, vi);
+                        subMatsubVecprod(&rb_V2[0], &fileBetaInt2[0], &rb_U2[0], nInt2, nInt2, vi, 0, ui);
+                    }
+                }
+
+                // Additional Interaction-only test
+                if(additionalInteraction){
+                    // Matrix indices
+                    int ui = nvars * nInt3;
+                    int vi = nvars * nInt3_sq;
+    
+                    // Betas
+                    std::vector<double> fileBetaInt3(nInt3);
+                    for (size_t i = 0; i < nInt3; i++) {
+                        fileBetaInt3[i] = std::stod(values[betaIntColumn3[i]]);
+                    }
+    
+                    // Model-based
+                    if (mb)
+                    {
+                        // Interaction
+                        mb_U3.resize(mb_U3.size() + nInt3);
+                        std::vector<int> mb_covIntColumn3 = fip->mb_covIntColumn3[fileName];
+                        for (size_t i = 0; i < nInt3; i++) {
+                            size_t isq = (i * nInt3);
+                            size_t ii  = vi + isq;
+                            for (size_t j = 0; j < nInt3; j++) {
+                                mb_V3.push_back(std::stod(values[mb_covIntColumn3[isq + j]]));
+                            }
+                            mb_V3[ii + i] *= mb_V3[ii + i];
+                        }
+    
+                        // Add to main matrix
+                        subMatInv(&mb_V3[0], nInt3, vi);
+                        subMatsubVecprod(&mb_V3[0], &fileBetaInt3[0], &mb_U3[0], nInt3, nInt3, vi, 0, ui);
+                    }
+    
+                    // Robust
+                    if (rb)
+                    {
+                        // Interaction
+                        rb_U3.resize(rb_U3.size() + nInt3);
+                        std::vector<int> rb_covIntColumn3 = fip->rb_covIntColumn3[fileName];
+                        for (size_t i = 0; i < nInt3; i++) {
+                            size_t isq = (i * nInt3);
+                            size_t ii  = vi + isq;
+                            for (size_t j = 0; j < nInt3; j++) {
+                                rb_V3.push_back(std::stod(values[rb_covIntColumn3[isq + j]]));
+                            }
+                            rb_V3[ii + i] *= rb_V3[ii + i];
+                        }
+    
+                        // Add to main matrix
+                        subMatInv(&rb_V3[0], nInt3, vi);
+                        subMatsubVecprod(&rb_V3[0], &fileBetaInt3[0], &rb_U3[0], nInt3, nInt3, vi, 0, ui);
+                    }
+                }
                 nvars++;
             } else {
                 
@@ -326,6 +447,144 @@ void metagem(CommandLine cmd)
                         }
                     }
                 }
+
+                // Additional joint test
+                if(additionalJoint){
+                    // Matrix index
+                    int ui = index * nInt2;
+                    int vi = index * (nInt2 * nInt2);
+    
+                    // Betas
+                    std::vector<double> fileBetaInt2(nInt2);
+                    for (size_t i = 0; i < nInt2; i++) {
+                        fileBetaInt2[i] = std::stod(values[betaIntColumn2[i]]) * dir;
+                    }
+    
+                    // Model-based
+                    if (mb)
+                    {
+                        // Interactions
+                        std::vector<double> mb_fileU2(nInt2);
+                        std::vector<double> mb_fileV2(nInt2 * nInt2);
+                        std::vector<int> mb_covIntColumn2 = fip->mb_covIntColumn2[fileName];
+    
+                        for (size_t i = 0; i < nInt2; i++) {
+                            size_t ii = i * nInt2;
+                            for (size_t j = 0; j < nInt2; j++) {
+                                mb_fileV2[ii + j] = std::stod(values[mb_covIntColumn2[ii + j]]);
+                            }
+                            mb_fileV2[ii + i] *= mb_fileV2[ii + i];
+                        }
+    
+                        // Add to main matrix
+                        matInv(&mb_fileV2[0], nInt2);
+                        matvecprod(&mb_fileV2[0], &fileBetaInt2[0], &mb_fileU2[0], nInt2, nInt2);
+                        for (size_t i = 0; i < nInt2; i++){
+                            size_t ii = i * nInt2;
+                            mb_U2[ui + i] += mb_fileU2[i];
+                            for (size_t j = 0; j < nInt2; j++) {
+                                mb_V2[vi + ii + j] += mb_fileV2[ii + j];
+                            }
+                        }
+                    }
+    
+                    // Robust
+                    if (rb)
+                    {
+                        // Interactions
+                        std::vector<double> rb_fileU2(nInt2);
+                        std::vector<double> rb_fileV2(nInt2 * nInt2);
+                        std::vector<int> rb_covIntColumn2 = fip->rb_covIntColumn2[fileName];
+                        
+                        for (size_t i = 0; i < nInt2; i++) {
+                            size_t ii = i * nInt2;
+                            for (size_t j = 0; j < nInt2; j++) {
+                                rb_fileV2[ii + j] = std::stod(values[rb_covIntColumn2[ii + j]]);
+                            }
+                            rb_fileV2[ii + i] *= rb_fileV2[ii + i];
+                        }
+    
+                        // Add to main matrix
+                        matInv(&rb_fileV2[0], nInt2);
+                        matvecprod(&rb_fileV2[0], &fileBetaInt2[0], &rb_fileU2[0], nInt2, nInt2);
+                        for (size_t i = 0; i < nInt2; i++) {
+                            size_t ii = i * nInt2;
+                            rb_U2[ui + i] += rb_fileU2[i];
+                            for (size_t j = 0; j < nInt2; j++) {
+                                rb_V2[vi + ii + j] += rb_fileV2[ii + j];
+                            }
+                        }
+                    }
+                }
+
+                // Additional interaction test
+                if(additionalInteraction){
+                    // Matrix index
+                    int ui = index * nInt3;
+                    int vi = index * (nInt3 * nInt3);
+    
+                    // Betas
+                    std::vector<double> fileBetaInt3(nInt3);
+                    for (size_t i = 0; i < nInt3; i++) {
+                        fileBetaInt3[i] = std::stod(values[betaIntColumn3[i]]) * dir;
+                    }
+    
+                    // Model-based
+                    if (mb)
+                    {
+                        // Interactions
+                        std::vector<double> mb_fileU3(nInt3);
+                        std::vector<double> mb_fileV3(nInt3 * nInt3);
+                        std::vector<int> mb_covIntColumn3 = fip->mb_covIntColumn3[fileName];
+    
+                        for (size_t i = 0; i < nInt3; i++) {
+                            size_t ii = i * nInt3;
+                            for (size_t j = 0; j < nInt3; j++) {
+                                mb_fileV3[ii + j] = std::stod(values[mb_covIntColumn3[ii + j]]);
+                            }
+                            mb_fileV3[ii + i] *= mb_fileV3[ii + i];
+                        }
+    
+                        // Add to main matrix
+                        matInv(&mb_fileV3[0], nInt3);
+                        matvecprod(&mb_fileV3[0], &fileBetaInt3[0], &mb_fileU3[0], nInt3, nInt3);
+                        for (size_t i = 0; i < nInt3; i++){
+                            size_t ii = i * nInt3;
+                            mb_U3[ui + i] += mb_fileU3[i];
+                            for (size_t j = 0; j < nInt3; j++) {
+                                mb_V3[vi + ii + j] += mb_fileV3[ii + j];
+                            }
+                        }
+                    }
+    
+                    // Robust
+                    if (rb)
+                    {
+                        // Interactions
+                        std::vector<double> rb_fileU3(nInt3);
+                        std::vector<double> rb_fileV3(nInt3 * nInt3);
+                        std::vector<int> rb_covIntColumn3 = fip->rb_covIntColumn3[fileName];
+                        
+                        for (size_t i = 0; i < nInt3; i++) {
+                            size_t ii = i * nInt3;
+                            for (size_t j = 0; j < nInt3; j++) {
+                                rb_fileV3[ii + j] = std::stod(values[rb_covIntColumn3[ii + j]]);
+                            }
+                            rb_fileV3[ii + i] *= rb_fileV3[ii + i];
+                        }
+    
+                        // Add to main matrix
+                        matInv(&rb_fileV3[0], nInt3);
+                        matvecprod(&rb_fileV3[0], &fileBetaInt3[0], &rb_fileU3[0], nInt3, nInt3);
+                        for (size_t i = 0; i < nInt3; i++) {
+                            size_t ii = i * nInt3;
+                            rb_U3[ui + i] += rb_fileU3[i];
+                            for (size_t j = 0; j < nInt3; j++) {
+                                rb_V3[vi + ii + j] += rb_fileV3[ii + j];
+                            }
+                        }
+                    }
+                }
             }
             n++;
         }
@@ -341,9 +600,13 @@ void metagem(CommandLine cmd)
     printDone(2);
 
     // Create the output file and write column header names
-    printOutputHeader(mb, rb, cmd.outFile, nInt1, cmd.intNames);
+    printOutputHeader(mb, rb, additionalJoint, additionalInteraction, cmd.outFile, cmd.outFile2, cmd.outFile3, nInt1, nInt2, nInt3, cmd.intNames, cmd.intNames2, cmd.intNames3);
     std::ofstream results(cmd.outFile, std::ios_base::app);
+    std::ofstream results2(cmd.outFile2, std::ios_base::app);
+    std::ofstream results3(cmd.outFile3, std::ios_base::app);
     std::ostringstream oss;
+    std::ostringstream oss2;
+    std::ostringstream oss3;
 
 
 
@@ -359,12 +622,23 @@ void metagem(CommandLine cmd)
     double pvalJoint;
     double* Ai = new double[nInt1 * nInt1];
     double* VE = new double[nInt * nInt];
+    double* Ai2 = new double[nInt2 * nInt2];
+    double* VE2 = new double[(nInt2-1) * (nInt2-1)];
+    double* Ai3 = new double[nInt3 * nInt3];
     std::vector<double> StempE(nInt, 0.0);
     std::vector<double> StempGE(nInt1, 0.0);
     std::vector<double> betaInt(nInt1, 0.0);
+    std::vector<double> StempE2(nInt2-1, 0.0);
+    std::vector<double> StempGE2(nInt2, 0.0);
+    std::vector<double> betaInt2(nInt2, 0.0);
+    std::vector<double> StempE3(nInt3, 0.0);
+    std::vector<double> betaInt3(nInt3, 0.0);
     boost::math::chi_squared chisq_dist_M(1);
     boost::math::chi_squared chisq_dist_Int(nInt);
     boost::math::chi_squared chisq_dist_Joint(nInt1);
+    boost::math::chi_squared chisq_dist_Int2(nInt2-1);
+    boost::math::chi_squared chisq_dist_Joint2(nInt2);
+    boost::math::chi_squared chisq_dist_Int3(nInt3);
 
     printMetaBegin(nFiles, nvars);
     for (int i = 0; i < nvars; i++)
@@ -373,6 +647,8 @@ void metagem(CommandLine cmd)
         int iss = (i * nInt1 * nInt1);
 
         oss << snpid[i] << nSeen[i] << "\t" << nSamples[i] << "\t" << AF[i] / 2.0 / nSamples[i] << "\t";
+        oss2 << snpid[i] << nSeen[i] << "\t" << nSamples[i] << "\t" << AF[i] / 2.0 / nSamples[i] << "\t";
+        oss3 << snpid[i] << nSeen[i] << "\t" << nSamples[i] << "\t" << AF[i] / 2.0 / nSamples[i] << "\t";
         if (mb)
         {
             subMatrix(&mb_V[0], Ai, nInt1, nInt1, nInt1, nInt1, iss);
@@ -521,6 +797,248 @@ void metagem(CommandLine cmd)
             oss.str(std::string());
             oss.clear();
         }
+
+        if(additionalJoint){
+            int is  = (i * nInt2);
+            int iss = (i * nInt2 * nInt2);
+    
+            if (mb)
+            {
+                subMatrix(&mb_V2[0], Ai2, nInt2, nInt2, nInt2, nInt2, iss);
+                subMatInv(&mb_V2[0], nInt2, iss);
+                subMatrix(&mb_V2[0], VE2, nInt2-1, nInt2-1, nInt2, nInt2-1, iss + nInt2 + 1);
+    
+                // Interaction effects
+                for (size_t j = 0; j < nInt2; j++) {
+                    for (size_t k = 0; k < nInt2; k++) {
+                        betaInt2[j] += (mb_V2[iss + (nInt2 * j) + k] * mb_U2[is + k]);
+                    }
+                }
+    
+                // Int P-value
+                matInv(VE2, nInt2-1);
+                for (size_t j = 0; j < (nInt2 - 1); j++) {
+                    for (size_t k = 0; k < (nInt2 - 1); k++) {
+                        StempE2[j] += (VE2[((nInt2 - 1) * j) + k] * betaInt2[k + 1]);
+                    }
+                }
+            
+                statInt = 0.0;
+                for (size_t j = 1; j < nInt2; j++) 
+                    statInt += betaInt2[j] * StempE2[j-1];
+                pvalInt = (std::isnan(statInt) || statInt <= 0.0) ? NAN : boost::math::cdf(complement(chisq_dist_Int2, statInt));
+    
+    
+                // Joint P-value
+                for (size_t j = 0; j < nInt2; j++) {
+                    for (size_t k = 0; k < nInt2; k++) {
+                        StempGE2[j] += (Ai2[(nInt2 * j) + k] * betaInt2[k]);
+                    }
+                }
+
+                statJoint = 0.0;
+                for (size_t k = 0; k < nInt2; k++)
+                    statJoint += betaInt2[k] * StempGE2[k];
+                pvalJoint = (std::isnan(statJoint) || statJoint <= 0.0) ? NAN : boost::math::cdf(complement(chisq_dist_Joint2, statJoint));
+                
+  
+                
+                // Print
+                for (size_t j = 0; j < nInt2; j++) {
+                    oss2 << betaInt2[j] << "\t";
+                }
+                for (size_t ii = 0; ii < nInt2; ii++) {
+                    oss2 << sqrt(mb_V2[iss + (ii * nInt2) + ii]) << "\t";
+                }
+                for (size_t ii = 0; ii < nInt2; ii++) {
+                    for (size_t jj = 0; jj < nInt2; jj++) {
+                        if (ii < jj) {
+                            oss2 << mb_V2[iss + (ii * nInt2) + jj] << "\t";
+                        }
+                    }
+                }
+                oss2 << pvalInt << "\t" << pvalJoint << ((rb) ? "\t" : "\n");
+                
+                std::fill(StempE2.begin(), StempE2.end(), 0.0);
+                std::fill(StempGE2.begin(), StempGE2.end(), 0.0);
+                std::fill(betaInt2.begin(), betaInt2.end(), 0.0);
+            }
+    
+            if (rb)
+            {
+                subMatrix(&rb_V2[0], Ai2, nInt2, nInt2, nInt2, nInt2, iss);
+                subMatInv(&rb_V2[0], nInt2, iss);
+                subMatrix(&rb_V2[0], VE2, nInt2-1, nInt2-1, nInt2, nInt2-1, iss + nInt2 + 1);
+    
+                // Interaction effects
+                for (size_t j = 0; j < nInt2; j++) {
+                    for (size_t k = 0; k < nInt2; k++) {
+                        betaInt2[j] += (rb_V2[iss + (nInt2 * j) + k] * rb_U2[is + k]);
+                    }
+                }
+    
+                // Int P-value
+                matInv(VE2, nInt2-1);
+                for (size_t j = 0; j < (nInt2 - 1); j++) {
+                    for (size_t k = 0; k < (nInt2 - 1); k++) {
+                        StempE2[j] += (VE2[((nInt2 - 1) * j) + k] * betaInt2[k + 1]);
+                    }
+                }
+            
+                statInt = 0.0;
+                for (size_t j = 1; j < nInt2; j++) 
+                    statInt += betaInt2[j] * StempE2[j-1];
+                pvalInt = (std::isnan(statInt) || statInt <= 0.0) ? NAN : boost::math::cdf(complement(chisq_dist_Int2, statInt));
+    
+                // Joint P-value
+                for (size_t j = 0; j < nInt2; j++) {
+                    for (size_t k = 0; k < nInt2; k++) {
+                        StempGE2[j] += (Ai2[(nInt2 * j) + k] * betaInt2[k]);
+                    }
+                }
+    
+                statJoint = 0.0;
+                for (size_t k = 0; k < nInt2; k++)
+                    statJoint += betaInt2[k] * StempGE2[k];
+                pvalJoint = (std::isnan(statJoint) || statJoint <= 0.0) ? NAN : boost::math::cdf(complement(chisq_dist_Joint2, statJoint));
+
+                
+                // Print
+                for (size_t j = 0; j < nInt2; j++) {
+                    oss2 << betaInt2[j] << "\t";
+                }
+                for (size_t ii = 0; ii < nInt2; ii++) {
+                    oss2 << sqrt(rb_V2[iss + (ii * nInt2) + ii]) << "\t";
+                }
+                for (size_t ii = 0; ii < nInt2; ii++) {
+                    for (size_t jj = 0; jj < nInt2; jj++) {
+                        if (ii < jj) {
+                            oss2 << rb_V2[iss + (ii * nInt2) + jj] << "\t";
+                        }
+                    }
+                }
+                oss2 << pvalInt << "\t" << pvalJoint << "\n";
+
+                std::fill(StempE2.begin(), StempE2.end(), 0.0);
+                std::fill(StempGE2.begin(), StempGE2.end(), 0.0);
+                std::fill(betaInt2.begin(), betaInt2.end(), 0.0);
+            }
+    
+            if (i % 100000 == 0)
+            {
+                results2 << oss2.str();
+                oss2.str(std::string());
+                oss2.clear();
+            }
+        }
+        
+        if(additionalInteraction){
+            int is  = (i * nInt3);
+            int iss = (i * nInt3 * nInt3);
+    
+            if (mb)
+            {
+                subMatrix(&mb_V3[0], Ai3, nInt3, nInt3, nInt3, nInt3, iss);
+                subMatInv(&mb_V3[0], nInt3, iss);
+    
+    
+                // Interaction effects
+                for (size_t j = 0; j < nInt3; j++) {
+                    for (size_t k = 0; k < nInt3; k++) {
+                        betaInt3[j] += (mb_V3[iss + (nInt3 * j) + k] * mb_U3[is + k]);
+                    }
+                }
+    
+                 
+    
+                // Int P-value
+                for (size_t j = 0; j < nInt3; j++) {
+                    for (size_t k = 0; k < nInt3; k++) {
+                        StempE3[j] += (Ai3[(nInt3 * j) + k] * betaInt3[k]);
+                    }
+                }
+
+                statInt = 0.0;
+                for (size_t k = 0; k < nInt3; k++)
+                    statInt += betaInt3[k] * StempE3[k];
+                pvalInt = (std::isnan(statInt) || statInt <= 0.0) ? NAN : boost::math::cdf(complement(chisq_dist_Int3, statInt));
+  
+                
+                // Print
+                for (size_t j = 0; j < nInt3; j++) {
+                    oss3 << betaInt3[j] << "\t";
+                }
+                for (size_t ii = 0; ii < nInt3; ii++) {
+                    oss3 << sqrt(mb_V3[iss + (ii * nInt3) + ii]) << "\t";
+                }
+                for (size_t ii = 0; ii < nInt3; ii++) {
+                    for (size_t jj = 0; jj < nInt3; jj++) {
+                        if (ii < jj) {
+                            oss3 << mb_V3[iss + (ii * nInt3) + jj] << "\t";
+                        }
+                    }
+                }
+                
+                oss3 << pvalInt << ((rb) ? "\t" : "\n"); 
+    
+                std::fill(StempE3.begin(), StempE3.end(), 0.0);
+                std::fill(betaInt3.begin(), betaInt3.end(), 0.0);
+            }
+    
+            if (rb)
+            {
+                subMatrix(&rb_V3[0], Ai3, nInt3, nInt3, nInt3, nInt3, iss);
+                subMatInv(&rb_V3[0], nInt3, iss);
+    
+    
+                // Interaction effects
+                for (size_t j = 0; j < nInt3; j++) {
+                    for (size_t k = 0; k < nInt3; k++) {
+                        betaInt3[j] += (rb_V3[iss + (nInt3 * j) + k] * rb_U3[is + k]);
+                    }
+                }
+    
+    
+                // Int P-value
+                for (size_t j = 0; j < nInt3; j++) {
+                    for (size_t k = 0; k < nInt3; k++) {
+                        StempE3[j] += (Ai3[(nInt3 * j) + k] * betaInt3[k]);
+                    }
+                }
+    
+                statInt = 0.0;
+                for (size_t k = 0; k < nInt3; k++)
+                    statInt += betaInt3[k] * StempE3[k];
+                pvalInt = (std::isnan(statInt) || statInt <= 0.0) ? NAN : boost::math::cdf(complement(chisq_dist_Int3, statInt));
+
+                
+                // Print
+                for (size_t j = 0; j < nInt3; j++) {
+                    oss3 << betaInt3[j] << "\t";
+                }
+                for (size_t ii = 0; ii < nInt3; ii++) {
+                    oss3 << sqrt(rb_V3[iss + (ii * nInt3) + ii]) << "\t";
+                }
+                for (size_t ii = 0; ii < nInt3; ii++) {
+                    for (size_t jj = 0; jj < nInt3; jj++) {
+                        if (ii < jj) {
+                            oss3 << rb_V3[iss + (ii * nInt3) + jj] << "\t";
+                        }
+                    }
+                }
+                oss3 << pvalInt << "\n";
+    
+                std::fill(StempE3.begin(), StempE3.end(), 0.0);
+                std::fill(betaInt3.begin(), betaInt3.end(), 0.0);
+            }
+    
+            if (i % 100000 == 0)
+            {
+                results3 << oss3.str();
+                oss3.str(std::string());
+                oss3.clear();
+            }
+        }
     }
 
     results << oss.str();
@@ -528,17 +1046,38 @@ void metagem(CommandLine cmd)
     oss.clear();
     results.close();
 
+    results2 << oss2.str();
+    oss2.str(std::string());
+    oss2.clear();
+    results2.close();
+
+    results3 << oss3.str();
+    oss3.str(std::string());
+    oss3.clear();
+    results3.close();
+
     delete[] Ai;
     delete[] VE;
 
+    delete[] Ai2;
+    delete[] VE2;
+
+    delete[] Ai3;
+    
     printDone(2);
-    printOutputLocation(cmd.outFile);
+    printOutputLocation1(cmd.outFile);
+    if(additionalJoint){
+        printOutputLocation2(cmd.outFile2);
+    }
+    if(additionalInteraction){
+        printOutputLocation3(cmd.outFile3);
+    }
 }
 
 void printWelcome() {
     cout << "\n*********************************************************\n";
     cout << "Welcome to METAGEM v" << VERSION << "\n";
-    cout << "(C) 2021-2023 Duy Pham and Han Chen \n";
+    cout << "(C) 2021-2025 Duy T. Pham, Han Chen and Shuyi Guo \n";
     cout << "GNU General Public License v3\n";
     cout << "*********************************************************\n";
 }
@@ -566,8 +1105,16 @@ void printDone(int nbs) {
   }
 }
 
-void printOutputLocation(std::string outFile) {
-  cout << "Results are in [" << outFile << "].";
+void printOutputLocation1(std::string outFile) {
+  cout << "Main results are in [" << outFile << "].\n";
+}
+
+void printOutputLocation2(std::string outFile) {
+  cout << "Additional joint meta-analysis results are in [" << outFile << "].\n";
+}
+
+void printOutputLocation3(std::string outFile) {
+  cout << "Additional interaction-only meta-analysis results are in [" << outFile << "].\n";
 }
 
 void printZeroVariantsError(std::string fileName) {

@@ -5,6 +5,7 @@
 #include <fstream>
 #include <chrono>
 #include <unordered_map>
+#include <unordered_set>
 
 #include <boost/math/distributions/chi_squared.hpp>
 
@@ -14,7 +15,7 @@
 #include "read_parameters.h"
 #include "file.h"
 
-#define VERSION "1.0"
+#define VERSION "2.0"
 
 using std::cout;
 using std::endl;
@@ -50,7 +51,9 @@ void printMetaBegin(int nFiles, int nvars);
 void printProcessedFiles(std::string fileName, int n);
 void printProcessingFiles();
 void printDone(int nbs);
-void printOutputLocation(std::string outFile);
+void printOutputLocation1(std::string outFile);
+void printOutputLocation2(std::string outFile);
+void printOutputLocation3(std::string outFile);
 void printZeroVariantsError(std::string fileName);
 void printNColumnError(int z, int n, std::string fileName, int nheader);
 void printOpenFileError(std::string fileName);
