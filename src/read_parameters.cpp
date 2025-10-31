@@ -173,7 +173,7 @@ void CommandLine::processCommandLine(int argc, char* argv[]) {
             exit(1);
         }
 
-        // Additional joint test
+        // Additional joint meta-analysis
         if (!additionalJointInfo.empty()) {
           additionalJoint = true;
           
@@ -235,7 +235,7 @@ void CommandLine::processCommandLine(int argc, char* argv[]) {
           }
         }
 
-        // Additional interaction test
+        // Additional interaction-only meta-analysis
         if (!additionalInteractionInfo.empty()) {
           additionalInteraction = true;
           
