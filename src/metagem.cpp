@@ -234,7 +234,7 @@ void metagem(CommandLine cmd)
                     subMatsubVecprod(&rb_V[0], &fileBetaInt[0], &rb_U[0], nInt1, nInt1, vi, 0, ui);
                 }
 
-                // Additional joint test
+                // Additional joint meta-analysis
                 if(additionalJoint){
                     // Matrix indices
                     int ui = nvars * nInt2;
@@ -287,7 +287,7 @@ void metagem(CommandLine cmd)
                     }
                 }
 
-                // Additional Interaction-only test
+                // Additional Interaction-only meta-analysis
                 if(additionalInteraction){
                     // Matrix indices
                     int ui = nvars * nInt3;
@@ -448,7 +448,7 @@ void metagem(CommandLine cmd)
                     }
                 }
 
-                // Additional joint test
+                // Additional joint meta-analysis
                 if(additionalJoint){
                     // Matrix index
                     int ui = index * nInt2;
@@ -517,7 +517,7 @@ void metagem(CommandLine cmd)
                     }
                 }
 
-                // Additional interaction test
+                // Additional interaction-only meta-analysis
                 if(additionalInteraction){
                     // Matrix index
                     int ui = index * nInt3;
@@ -1106,7 +1106,7 @@ void printDone(int nbs) {
 }
 
 void printOutputLocation1(std::string outFile) {
-  cout << "Main results are in [" << outFile << "].\n";
+  cout << "Main meta-analysis results are in [" << outFile << "].\n";
 }
 
 void printOutputLocation2(std::string outFile) {
