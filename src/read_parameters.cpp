@@ -84,7 +84,7 @@ void CommandLine::processCommandLine(int argc, char* argv[]) {
                 nfiles++;
             }
 
-            if (nfiles <= 2)
+            if (nfiles < 2)
             {
                 cerr << "\nERROR: METAGEM requires at least 2 input files.\n\n";
                 exit(1);
